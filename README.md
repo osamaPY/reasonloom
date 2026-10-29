@@ -4,71 +4,103 @@
 
 <h1 align="center">Reasonloom</h1>
 
-<p align="center"><strong>Weave ideas into understanding.</strong><br>
-An AI learning workspace: keep your sources, learn from them, practice, and come back to review.</p>
+<p align="center"><strong>Weave ideas into understanding.</strong></p>
 
 ![Reasonloom branding: icon, wordmark, palette, type](docs/assets/reasonloom/branding.png)
 
-> **Independent fork of [LearnHarness](https://github.com/amosblomqvist/learnharness) by Amos Blomqvist.** The teaching engine, knowledge graph, practice agent, dictation, provider support and desktop shell are his, inherited under AGPL-3.0. This fork adds the workspace, rebrand and features below. Not endorsed by the original author.
+I found [LearnHarness](https://github.com/amosblomqvist/learnharness) by Amos Blomqvist and loved the idea: an AI that teaches you step by step, checks what you actually understand, and keeps a knowledge graph of it. I wanted to take it further, so I forked it and built **Reasonloom**.
 
-## What changed
+All the hard parts (the teaching engine, the knowledge graph, practice sessions, dictation, provider support, the desktop shell) are Amos's work and are used here under AGPL-3.0. Everything described under "What I added" is mine. This isn't endorsed by him.
+
+## What I added
+
+I wanted my notes, my lessons, my practice and my review to live in one place instead of being separate things. So:
+
+- **Subjects**: group sessions by what you're learning.
+- **Sources**: a local library of your own notes.
+- **Source-grounded sessions**: lessons and practice that use your notes and cite them.
+- **Review**: practice attempts come back on a schedule, with the reason shown.
+- **A new look**: new name, mark, colours and typography.
+
+Before and after:
 
 | LearnHarness (before) | Reasonloom (now) |
 | :---: | :---: |
 | ![Before: upstream teaching session](docs/assets/teaching-session.png) | ![After: source-grounded session with citations](docs/assets/reasonloom/grounded-session.png) |
 
-New look: ink, paper and teal; serif headings; a woven-grid mark; a visible keyboard focus ring on the new pages. New sidebar sections: **Subjects, Sources, Review**.
+*The reply in the "after" screenshot is a scripted example I used for the picture, not live model output.*
 
-### Subjects
-Group sessions by what you're learning, with a goal. Archive instead of delete.
+## Get it running
+
+You need Node.js (I built and tested it on Node 24).
+
+```bash
+git clone https://github.com/osamaPY/learnharness-fork.git
+cd learnharness-fork
+npm install
+npm run dev
+```
+
+Open http://localhost:3000. There's no installer yet, so for now it runs from source.
+
+## How to use it
+
+### 1. Connect a model
+Open **Settings** (bottom of the sidebar), add an API key for the provider you like, and pick a model for each of the three slots. You pay your provider directly; there's no Reasonloom account or markup. Chats, notes, graph and keys all stay on your machine.
+
+No key yet? Skip to step 2 and load the sample workspace to look around.
+
+### 2. Make a subject
+Click **Subjects** in the sidebar, give it a name and (optionally) a goal like "understand eigenvectors well enough to do the homework". Each subject card has **Start a lesson** and **Start practice** buttons, and you can move any session into a subject with the dropdown next to it. Archiving a subject hides it but keeps its sessions.
+
+On an empty Subjects page there's a **Load the sample workspace** link. It creates a clearly labelled fake subject, source and practice record so you can click around without an API key.
 
 ![Subjects page](docs/assets/reasonloom/subjects.png)
 
-### Sources
-Keep `.md` / `.txt` notes as a local library. Duplicates are caught, and every passage has a stable link that tells you if the text moved or was edited. Nothing is sent to a model.
+### 3. Add your sources
+Open **Sources** and click **Add files** to add `.md`, `.markdown` or `.txt` notes (up to 1 MiB each). Then:
+
+- Use the dropdown on a source to attach it to a subject.
+- Click a source to read it split into passages, and use the search box to find things.
+- Hover a passage and click **Link** to copy a link straight to it.
+- Add the same file again and it's skipped as a duplicate. Add an edited version with the same name and it updates in place.
+
+Adding a source only stores a copy locally. Nothing is sent to a model until you start a session with that subject.
 
 ![Sources page with a highlighted passage](docs/assets/reasonloom/sources.png)
 
-### Source-grounded sessions
-Start a lesson or practice from a subject (card button, or the picker on the home composer). The model gets that subject's passages (`S1.P1`, `S1.P2`, …), is told to prefer them and say when they don't cover something, and to cite what it used. Cited labels become links to the exact passage. A "Sources" card shows what the model was given.
+### 4. Learn or practice from your sources
+Start a session in either of these ways:
 
-*The reply in the screenshot above is a scripted example, not live model output.*
+- Press **Start a lesson** or **Start practice** on a subject card, or
+- Use the **subject picker** above the box on the home screen (it only shows up once you have a subject), then type what you want to learn.
+
+The model is handed that subject's passages, told to prefer them, to say so when your notes don't cover something, and to cite what it used. A collapsible **Sources** card at the top of the session shows exactly what it was given. When the reply cites something like `S1.P3`, click it and you land on that passage in your notes.
+
+*Teach* mode explains and checks your understanding. *Practice* mode gives you problems to solve.
 
 ![Home with the subject picker](docs/assets/reasonloom/home.png)
 
-### Review
-Practice attempts are recorded, and concepts come back on a fixed schedule (1, 3, 7, 14, 30, 60 days) with the reason shown. Postpone an item, or flag a grade as wrong.
+### 5. Come back for review
+Finished practice problems show up on **Review**. Each concept returns after 1, 3, 7, 14, 30, then 60 days, and the page tells you why it's due ("last attempt solved with hints, 5 days overdue"). Use **Postpone** for 1, 3 or 7 days, or **Grading is wrong** if the model marked you incorrectly (that attempt then stops counting).
 
 ![Review page](docs/assets/reasonloom/review.png)
 
-### Try it without an API key
-On an empty Subjects page, click **Load the sample workspace**: a labelled, synthetic subject, source and practice record. No model involved.
+## What's still rough
 
-## Run it
+I'd rather you know than be surprised:
 
-Needs Node.js (developed and tested on Node 24).
+- No installer or release yet. Run it from source.
+- Source grounding is an instruction to the model, not a fence. A citation shows the passage exists, not that it supports the claim. I haven't tested it with a live model yet.
+- The review schedule is a simple fixed rule, not proof it helps you remember. Days are UTC.
+- Sources are text and Markdown only for now: no PDF, web pages or OCR. The model only gets about 24k characters from up to 10 sources, and the Sources card tells you what was left out.
+- Only sessions started with a subject chosen are grounded; existing sessions aren't.
+- The macOS icon and installer art are still LearnHarness's, and I haven't checked whether the name "Reasonloom" is free to use.
 
-```bash
-npm install
-npm run dev        # http://localhost:3000
-npm test           # no network, no LLM
-```
+## More
 
-Add a provider key in **Settings** and pick your models. Your chats, graph, sources and keys stay on your machine; model requests go to the provider you choose.
-
-## Honest limits
-
-- No downloadable installer or release yet. Run from source.
-- Source grounding is an instruction to the model, **not enforced**. A citation proves the passage exists, not that it supports the claim. Not yet tested against a live model.
-- The review schedule is a simple convention, not proof it improves retention. Days are UTC.
-- Library: text and Markdown only (no PDF, URLs or OCR). Grounding context is capped (~24k characters, 10 sources) and the card says what was left out.
-- Sessions are grounded only when started with a subject chosen.
-- The macOS icon and installer art still use upstream artwork. The name "Reasonloom" hasn't been trademark-checked.
-
-## Docs
-
-[Build progress and test evidence](docs/BUILD_PROGRESS.md) · [Decisions](docs/BUILD_DECISIONS.md) · [Roadmap](docs/FORK_ROADMAP.md) · [Development](docs/development.md) · [Architecture](docs/architecture.md) · [Desktop release](docs/desktop-release.md) · [Issues](https://github.com/osamaPY/learnharness-fork/issues)
+[Build progress and test results](docs/BUILD_PROGRESS.md) · [Decisions](docs/BUILD_DECISIONS.md) · [Roadmap](docs/FORK_ROADMAP.md) · [Development](docs/development.md) · [Architecture](docs/architecture.md) · [Issues](https://github.com/osamaPY/learnharness-fork/issues)
 
 ## License
 
-[AGPL-3.0](LICENSE). Original copyright and notices are preserved. If you run a modified version for others over a network, you must offer them the source.
+[AGPL-3.0](LICENSE). The original copyright and notices are kept. If you run a modified version for other people over a network, you have to offer them the source.
