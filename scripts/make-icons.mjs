@@ -5,6 +5,7 @@
 //   build/icon.ico  — Windows (.ico with 16/24/32/48/64/128/256 PNG entries)
 //   build/icon.png  — Linux (512×512; AppImage/deb/desktop entry)
 //
+// (The macOS fallback icns and the DMG background are also generated below.)
 // macOS does NOT come from here: build/icon.icon (the Icon Composer
 // document) is the mac source of truth, compiled by actool at package
 // time into Assets.car (macOS 26 Liquid Glass) + a fallback icns; the
@@ -53,3 +54,42 @@ console.log(`build/icon.ico  ${ICO_SIZES.join("/")} — ${(ico.length / 1024).to
 const png512 = render(512);
 writeFileSync(path.join(root, "build", "icon.png"), png512);
 console.log(`build/icon.png  512×512 — ${(png512.length / 1024).toFixed(1)} KB`);
+
+// ---- build/icon.icns: the pre-Tahoe macOS fallback ------------------------
+// (afterPack copies this over actool's 256px-capped fallback.) Packed by hand:
+// an 'icns' container of PNG-compressed entries. The squircle is inset to the
+// macOS icon grid (about 80% of the canvas) because macOS draws no mask for
+// a plain icns.
+{
+	const inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+	const padded = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><g transform="translate(100 100) scale(0.8047)">${inner}</g></svg>`;
+	const renderPadded = (size) => new Resvg(padded, { fitTo: { mode: "width", value: size } }).render(size, size).asPng();
+	// [OSType, pixel size] — the full set iconutil would produce.
+	const ENTRIES = [
+		["icp4", 16], ["icp5", 32], ["icp6", 64], ["ic07", 128], ["ic08", 256], ["ic09", 512], ["ic10", 1024],
+		["ic11", 32], ["ic12", 64], ["ic13", 256], ["ic14", 512],
+	];
+	const chunks = ENTRIES.map(([type, size]) => {
+		const png = renderPadded(size);
+		const head = Buffer.alloc(8);
+		head.write(type, 0, "ascii");
+		head.writeUInt32BE(png.length + 8, 4);
+		return Buffer.concat([head, png]);
+	});
+	const body = Buffer.concat(chunks);
+	const header = Buffer.alloc(8);
+	header.write("icns", 0, "ascii");
+	header.writeUInt32BE(body.length + 8, 4);
+	writeFileSync(path.join(root, "build", "icon.icns"), Buffer.concat([header, body]));
+	console.log(`build/icon.icns ${ENTRIES.length} entries 16→1024 — ${((body.length + 8) / 1024).toFixed(1)} KB`);
+}
+
+// ---- build/background.png (+ @2x): the DMG window art ----------------------
+{
+	const dmg = readFileSync(path.join(root, "build", "dmg-background.svg"), "utf8");
+	for (const [file, width] of [["background.png", 540], ["background@2x.png", 1080]]) {
+		const png = new Resvg(dmg, { fitTo: { mode: "width", value: width }, font: { loadSystemFonts: true } }).render().asPng();
+		writeFileSync(path.join(root, "build", file), png);
+		console.log(`build/${file}  ${width}px — ${(png.length / 1024).toFixed(1)} KB`);
+	}
+}

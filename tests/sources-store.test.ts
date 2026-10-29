@@ -56,7 +56,7 @@ describe("source library store", () => {
 				first: { name: "C:\\x\\notes.md", text: "# One\r\n\r\nalpha" },
 				copy: { name: "copy.md", text: "# One\n\nalpha" },
 				changed: { name: "NOTES.md", text: "# One\n\nalpha changed" },
-				bad: { name: "a.pdf", text: "x" },
+				bad: { name: "a.docx", text: "x" },
 			};
 			const out = run(
 				dir,
@@ -73,7 +73,7 @@ describe("source library store", () => {
 			assert.equal(r.a.name, "notes.md");
 			assert.deepEqual([r.dup.status, r.dup.id], ["duplicate", r.a.id], "CRLF/LF variant of the same text is a duplicate");
 			assert.deepEqual([r.upd.status, r.upd.id], ["updated", r.a.id]);
-			assert.deepEqual(r.bad, { name: "a.pdf", status: "rejected", reason: "unsupported_type" });
+			assert.deepEqual(r.bad, { name: "a.docx", status: "rejected", reason: "unsupported_type" });
 
 			const after = JSON.parse(run(dir, `const i = m.readSourceIndex(); console.log(JSON.stringify({ i, t: m.readSourceText(i[0].id) }));`));
 			assert.equal(after.i.length, 1);

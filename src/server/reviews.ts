@@ -31,7 +31,8 @@ function collect(): { attempts: Attempt[]; titles: Map<string, string> } {
 	return { attempts, titles };
 }
 
-export function reviewOverview(now: number = Date.now()): ReviewOverview {
+/** `offsetMin`: the learner's UTC offset in minutes (east positive); default UTC. */
+export function reviewOverview(now: number = Date.now(), offsetMin = 0): ReviewOverview {
 	const { attempts, titles } = collect();
 	const events = readReviewEvents();
 	const names = new Map(graphView().propositions.map((n) => [n.id, n.name]));
@@ -46,7 +47,7 @@ export function reviewOverview(now: number = Date.now()): ReviewOverview {
 		box: r.box,
 		lastChatId: r.usable[r.usable.length - 1]!.chatId,
 	});
-	const { due, upcoming } = splitQueue(scheduleConcepts(attempts, events, now), now);
+	const { due, upcoming } = splitQueue(scheduleConcepts(attempts, events, now, offsetMin), now);
 	const disputed = disputedIds(events);
 	const rows: AttemptRow[] = [...attempts]
 		.sort((a, b) => b.at - a.at)
@@ -62,11 +63,11 @@ export function reviewOverview(now: number = Date.now()): ReviewOverview {
 export type ReviewActionResult = { ok: true } | { ok: false; error: "not_found" | "invalid_days" };
 
 /** Postpone a queued concept. Only concepts that have a schedule can be postponed. */
-export function postponeConcept(concept: string, days: number, now: number = Date.now()): ReviewActionResult {
+export function postponeConcept(concept: string, days: number, now: number = Date.now(), offsetMin = 0): ReviewActionResult {
 	const { attempts } = collect();
-	const review = scheduleConcepts(attempts, readReviewEvents(), now).find((r) => r.concept === concept);
+	const review = scheduleConcepts(attempts, readReviewEvents(), now, offsetMin).find((r) => r.concept === concept);
 	if (!review) return { ok: false, error: "not_found" };
-	const event = postponeEvent(review, days, now);
+	const event = postponeEvent(review, days, now, offsetMin);
 	if (!event) return { ok: false, error: "invalid_days" };
 	appendReviewEvent(event);
 	return { ok: true };

@@ -17,7 +17,10 @@
 
 export const SOURCE_MAX_BYTES = 1024 * 1024;
 export const SOURCE_MAX_FILES_PER_REQUEST = 25;
-export const SOURCE_EXTENSIONS = [".md", ".markdown", ".txt"] as const;
+export const SOURCE_EXTENSIONS = [".md", ".markdown", ".txt", ".pdf"] as const;
+
+/** How a source came in: a plain file, a PDF's text layer, or a fetched web page. */
+export type SourceKind = "text" | "pdf" | "web";
 
 export interface SourceMeta {
 	id: string;
@@ -28,6 +31,12 @@ export interface SourceMeta {
 	passages: number;
 	revision: number;
 	subjectId: string | null;
+	/** Absent on sources added before this existed = "text". */
+	kind?: SourceKind;
+	/** The URL a web/PDF-by-URL source was fetched from. */
+	origin?: string;
+	/** Page count of a PDF source. */
+	pages?: number;
 	addedAt: string;
 	updatedAt: string;
 }
@@ -100,19 +109,41 @@ export function textHash(text: string): string {
 	return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, "0");
 }
 
+/** A passage that is only a displayed formula ($$...$$ or \[...\]), optionally with trailing punctuation. */
+const DISPLAY_ONLY = /^(\$\$[\s\S]*\$\$|\\\[[\s\S]*\\\])\s*[.,;:]?$/;
+
 /** Split into blank-line-separated blocks. A fenced code block that itself
- * contains a blank line splits into two passages (documented limit). */
+ * contains a blank line splits into two passages (documented limit).
+ *
+ * A displayed formula on its own is not a passage: it belongs to the sentence
+ * that introduces it, and a sentence that carries on after it (it starts in
+ * lower case) belongs there too. Without this a web page's "…the roots of / $$f(x)$$ / which is a polynomial"
+ * would become three fragments, none of which a citation could stand on. */
 export function splitPassages(rawText: string): Passage[] {
 	const text = normalizeText(rawText);
-	const passages: Passage[] = [];
+	const blocks: { start: number; end: number; body: string }[] = [];
 	const re = /\S[\s\S]*?(?=\n[ \t]*\n|$)/g;
 	for (let m = re.exec(text); m; m = re.exec(text)) {
 		const body = m[0].replace(/\s+$/, "");
-		const index = passages.length;
-		passages.push({ index, ref: `${index}.${textHash(body)}`, text: body, start: m.index, end: m.index + body.length });
+		blocks.push({ start: m.index, end: m.index + body.length, body });
 		if (m[0].length === 0) re.lastIndex++;
 	}
-	return passages;
+	const merged: { start: number; end: number; math: boolean }[] = [];
+	for (const b of blocks) {
+		const last = merged[merged.length - 1];
+		const isMath = DISPLAY_ONLY.test(b.body);
+		const continues = last?.math === true && /^[a-z]/.test(b.body);
+		if (last && (isMath || continues)) {
+			last.end = b.end;
+			last.math = isMath;
+		} else {
+			merged.push({ start: b.start, end: b.end, math: false });
+		}
+	}
+	return merged.map((p, index) => {
+		const body = text.slice(p.start, p.end);
+		return { index, ref: `${index}.${textHash(body)}`, text: body, start: p.start, end: p.end };
+	});
 }
 
 export type PassageResolution =

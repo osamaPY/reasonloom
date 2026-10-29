@@ -34,9 +34,21 @@ const STATUS_TEXT: Record<UploadResult["status"], string> = {
 const REASON_TEXT: Record<string, string> = {
 	unsupported_type: `only ${SOURCE_EXTENSIONS.join(", ")} files are supported`,
 	empty: "the file is empty",
-	too_large: "the file is over 1 MiB",
+	too_large: "it is too large (notes: 1 MiB, PDFs: 20 MiB, web pages: 5 MiB)",
 	not_text: "the file is not plain text",
 	write_failed: "it could not be saved — try again",
+	bad_pdf: "that does not look like a readable PDF",
+	no_text_layer: "the PDF has no text layer (it looks scanned); OCR is not supported",
+	too_many_pages: "the PDF has more than 400 pages",
+	bad_url: "that is not a valid web address",
+	bad_scheme: "only http and https addresses are supported",
+	credentials: "addresses with a username or password are not supported",
+	blocked_host: "that address is private or local, so it was not fetched",
+	fetch_failed: "the page could not be fetched (offline, slow or refused)",
+	http_error: "the server answered with an error",
+	too_many_redirects: "the address redirects too many times",
+	unsupported_content: "that address is not a web page, PDF or text file",
+	not_readable: "no readable article text was found on that page",
 };
 
 export function SourcesView() {
@@ -45,6 +57,7 @@ export function SourcesView() {
 	const [results, setResults] = useState<UploadResult[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
+	const [url, setUrl] = useState("");
 	const [detail, setDetail] = useState<Detail | null>(null);
 	const [query, setQuery] = useState("");
 	const [copied, setCopied] = useState<string | null>(null);
@@ -91,6 +104,27 @@ export function SourcesView() {
 			document.getElementById(`passage-${r.passage.index}`)?.scrollIntoView({ block: "center" });
 		}
 	}, [detail]);
+
+	const addUrl = async () => {
+		const value = url.trim();
+		if (!value || busy) return;
+		setBusy(true);
+		setError(null);
+		try {
+			const res = await fetch("/api/sources/url", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url: value }) });
+			const body = (await res.json()) as { results?: UploadResult[]; error?: string };
+			if (!res.ok) setError("The request failed. Please retry.");
+			else {
+				setResults(body.results ?? []);
+				if (body.results?.every((r) => r.status !== "rejected")) setUrl("");
+			}
+			await loadList();
+		} catch {
+			setError("The request failed. Please retry.");
+		} finally {
+			setBusy(false);
+		}
+	};
 
 	const upload = async (files: FileList | null) => {
 		if (!files || files.length === 0 || busy) return;
@@ -155,7 +189,7 @@ export function SourcesView() {
 			<p className="reasonloom-eyebrow">A library for your thinking</p>
 			<h1 className="reasonloom-title">Sources</h1>
 			<p className="pb-6 font-prose text-base leading-relaxed text-muted-foreground">
-				Keep your notes here as plain text ({SOURCE_EXTENSIONS.join(", ")}, up to 1 MiB each). Adding a file stores a copy; nothing is sent to a model.
+				Keep your material here: notes and text files ({SOURCE_EXTENSIONS.filter((e) => e !== ".pdf").join(", ")}), PDFs with a text layer, or a public web page. Adding something stores a local copy of its text; nothing is sent to a model until you start a session with that subject.
 			</p>
 
 			<input ref={fileInput} type="file" multiple accept={SOURCE_EXTENSIONS.join(",")} className="hidden" onChange={(e) => void upload(e.target.files)} />
@@ -163,6 +197,18 @@ export function SourcesView() {
 				<UploadIcon className="size-3" />
 				{busy ? "Adding…" : "Add files…"}
 			</button>
+			<form
+				className="mb-4 flex items-center gap-2"
+				onSubmit={(e) => {
+					e.preventDefault();
+					void addUrl();
+				}}
+			>
+				<input aria-label="Web page address" data-testid="source-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="…or paste a web page address (https://…)" className="min-w-0 flex-1 rounded-md border bg-background px-2 py-1.5 font-ui text-xs" />
+				<button type="submit" data-testid="add-url" disabled={busy || url.trim() === ""} className="shrink-0 rounded-md border px-3 py-1.5 font-ui text-xs hover:bg-accent disabled:opacity-50">
+					Add page
+				</button>
+			</form>
 
 			{error && (
 				<p role="alert" className="mb-3 font-ui text-xs text-destructive">
@@ -187,6 +233,7 @@ export function SourcesView() {
 						<button type="button" onClick={() => void open(s.id)} className="min-w-0 flex-1 text-left">
 							<span className="block truncate font-ui text-sm">{s.name}</span>
 							<span className="block font-ui text-xs text-muted-foreground">
+								{s.kind === "pdf" ? `PDF${s.pages ? `, ${s.pages} pages` : ""} · ` : s.kind === "web" ? "web page · " : ""}
 								{s.passages} {s.passages === 1 ? "passage" : "passages"} · {s.chars.toLocaleString()} chars · revision {s.revision}
 								{subjectName(s.subjectId) ? ` · ${subjectName(s.subjectId)}` : ""}
 							</span>
@@ -215,6 +262,14 @@ export function SourcesView() {
 						<h2 className="min-w-0 flex-1 truncate font-ui text-sm">{detail.source.name}</h2>
 						<input aria-label="Search in this source" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="w-40 rounded-md border bg-background px-2 py-1 font-ui text-xs" />
 					</div>
+					{detail.source.origin && (
+						<p className="pb-2 font-ui text-xs text-muted-foreground">
+							Fetched from{" "}
+							<a href={detail.source.origin} target="_blank" rel="noopener noreferrer" className="underline">
+								{detail.source.origin}
+							</a>
+						</p>
+					)}
 					{resolution?.status === "moved" && <p className="pb-2 font-ui text-xs text-muted-foreground">This passage has moved since the link was made; showing its current position.</p>}
 					{resolution?.status === "stale" && (
 						<p role="alert" className="pb-2 font-ui text-xs text-destructive">

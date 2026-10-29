@@ -52,7 +52,7 @@ import { PlanMarginalia, planExists } from "@/components/plan-window";
 import { MermaidOverlay, SessionMermaidContext } from "@/components/session-overlay";
 import { AbortTurnDialog, type AbortMode } from "@/components/abort-turn-dialog";
 import { ArrowRightIcon, DumbbellIcon, WaypointsIcon } from "lucide-react";
-import { linkCitations, type CitationTarget, type PlanBlockData, type SourceContextDetails } from "@/src/core";
+import { lacksCitation, linkCitations, type CitationTarget, type PlanBlockData, type SourceContextDetails } from "@/src/core";
 import { QuestionDock } from "@/components/question-dock";
 import { SessionFind } from "@/components/session-find";
 import { SessionMessageNavigation } from "@/components/session-navigation";
@@ -1570,6 +1570,11 @@ export function Chat({
 														return (
 															<div key={part.id || pi} id={anchor} data-source-message-id={sourceId ?? undefined} className="lh-source-passage">
 																<CitationBoundary><MessageResponse>{linkCitations(part.text ?? "", citations)}</MessageResponse></CitationBoundary>
+{lacksCitation(part.text ?? "", citations) && (
+	<p data-testid="no-citation-note" className="mt-1 font-ui text-xs text-muted-foreground/80">
+		No passage from your notes is cited here.
+	</p>
+)}
 															</div>
 														);
 													}

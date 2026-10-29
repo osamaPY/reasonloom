@@ -41,7 +41,7 @@ describe("decideIngest", () => {
 	});
 
 	it("rejects unsupported types, empty, oversized and binary content", () => {
-		assert.deepEqual(decideIngest([], input({ name: "a.pdf" })), { kind: "reject", reason: "unsupported_type" });
+		assert.deepEqual(decideIngest([], input({ name: "a.docx" })), { kind: "reject", reason: "unsupported_type" });
 		assert.deepEqual(decideIngest([], input({ name: "" })), { kind: "reject", reason: "unsupported_type" });
 		assert.deepEqual(decideIngest([], input({ text: " \n " })), { kind: "reject", reason: "empty" });
 		assert.deepEqual(decideIngest([], input({ bytes: SOURCE_MAX_BYTES + 1 })), { kind: "reject", reason: "too_large" });

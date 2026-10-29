@@ -21,7 +21,10 @@ const OUTCOME_LABEL: Record<string, string> = {
 	dismissed: "Dismissed",
 };
 
-const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+/** The learner's UTC offset in minutes, east positive (browser time zone). */
+const tzOffset = () => -new Date().getTimezoneOffset();
+/** A timestamp as the learner's local calendar day. */
+const day = (ms: number) => new Date(ms + tzOffset() * 60_000).toISOString().slice(0, 10);
 
 export function ReviewView() {
 	const [data, setData] = useState<ReviewOverview | null>(null);
@@ -29,7 +32,7 @@ export function ReviewView() {
 
 	const load = useCallback(async () => {
 		try {
-			const res = await fetch("/api/reviews");
+			const res = await fetch(`/api/reviews?tz=${tzOffset()}`);
 			if (!res.ok) throw new Error("Review request failed");
 			setData((await res.json()) as ReviewOverview);
 			setError(null);
@@ -41,10 +44,10 @@ export function ReviewView() {
 		void load();
 	}, [load]);
 
-	const post = async (url: string, body: unknown) => {
+	const post = async (url: string, body: Record<string, unknown>) => {
 		setError(null);
 		try {
-			const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+			const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, tz: tzOffset() }) });
 			if (!res.ok) {
 				setError("That did not work — the item may no longer exist.");
 				return;

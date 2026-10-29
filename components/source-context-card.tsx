@@ -37,6 +37,8 @@ export function SourceContextCard({ data }: { data: SourceContextDetails }) {
 			</button>
 			{open && (
 				<div data-testid="source-context-body" className="mt-1 space-y-3 rounded-lg border border-dashed border-border/70 px-4 py-3 text-xs">
+					{data?.ranked && <p className="text-muted-foreground/80">Your notes are larger than fits, so the passages most relevant to your opening message were chosen.</p>}
+					<p className="text-muted-foreground/80">A “?” after a cited label means that passage shares few words with the sentence citing it, so check it. A label shown as “not in your sources” was never given to the model.</p>
 					{sources.map((s) => (
 						<div key={s.id}>
 							<p className="font-medium text-foreground/80">

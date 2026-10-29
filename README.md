@@ -15,7 +15,7 @@ The teaching engine, knowledge graph, practice sessions, dictation, model integr
 ## What I added
 
 - **Subjects** keep lessons and practice together for a topic I'm studying.
-- **Sources** let me bring my Markdown and text notes into a local library.
+- **Sources** let me bring my notes, PDFs and web pages into a local library.
 - **Source-grounded sessions** pass the selected subject's notes to the model and link citations back to the passages it saw. The citations still need checking; they're not proof that an answer is correct.
 - **Review** brings practice attempts back on a simple schedule and shows why they're due.
 - **The Reasonloom identity** gives the fork its own name, icon, colours and typography.
@@ -56,14 +56,20 @@ On an empty Subjects page there's a **Load the sample workspace** link. It creat
 ![Subjects page](docs/assets/reasonloom/subjects.png)
 
 ### 3. Add your sources
-Open **Sources** and click **Add files** to add `.md`, `.markdown` or `.txt` notes (up to 1 MiB each). Then:
+Open **Sources**. You can add three kinds of material:
+
+- **Notes**: click **Add files** and pick `.md`, `.markdown` or `.txt` files (up to 1 MiB each).
+- **PDFs**: pick a `.pdf` the same way. Its text layer is extracted page by page, so passages carry their page number (for example "(p. 3)"). Scanned PDFs have no text layer and are refused with a clear message; there is no OCR.
+- **Web pages**: paste an address and click **Add page**. I fetch the article text and keep its formulas as LaTeX. Only public pages work (private and local addresses are blocked on purpose).
+
+Then:
 
 - Use the dropdown on a source to attach it to a subject.
 - Click a source to read it split into passages, and use the search box to find things.
 - Hover a passage and click **Link** to copy a link straight to it.
 - Add the same file again and it's skipped as a duplicate. Add an edited version with the same name and it updates in place.
 
-Adding a source only stores a copy locally. Nothing is sent to a model until you start a session with that subject.
+Adding a source only stores a copy of its text locally. Nothing is sent to a model until you start a session with that subject.
 
 ![Sources page with a highlighted passage](docs/assets/reasonloom/sources.png)
 
@@ -71,7 +77,8 @@ Adding a source only stores a copy locally. Nothing is sent to a model until you
 Start a session in either of these ways:
 
 - Press **Start a lesson** or **Start practice** on a subject card, or
-- Use the **subject picker** above the box on the home screen (it only shows up once you have a subject), then type what you want to learn.
+- Use the **subject picker** above the box on the home screen (it only shows up once you have a subject), then type what you want to learn, or
+- For a session you already have, open **Subjects**, put the session under a subject, and click **Use sources**. It gives that session the subject's sources from its next reply on (click again later to refresh them).
 
 The model is handed that subject's passages, told to prefer them, to say so when your notes don't cover something, and to cite what it used. A collapsible **Sources** card at the top of the session shows exactly what it was given. When the reply cites something like `S1.P3`, click it and you land on that passage in your notes.
 
@@ -95,12 +102,12 @@ Finished practice problems show up on **Review**. Each concept returns after 1, 
 
 I'd rather you know than be surprised:
 
-- No installer or release yet. Run it from source.
-- Source grounding is an instruction to the model, not a fence. A citation shows the passage exists, not that it supports the claim. I've run lessons, practice and review end to end with DeepSeek V4.1 Flash on the sample notes and the citations pointed at real, relevant passages, but that's a handful of runs, not an evaluation. In lessons the model sometimes asks a question without citing anything.
-- The review schedule is a simple fixed rule, not proof it helps you remember. Days are UTC.
-- Sources are text and Markdown only for now: no PDF, web pages or OCR. The model only gets about 24k characters from up to 10 sources, and the Sources card tells you what was left out.
-- Only sessions started with a subject chosen are grounded; existing sessions aren't.
-- The macOS icon and installer art are still LearnHarness's, and I haven't checked whether the name "Reasonloom" is free to use.
+- **No published release.** I built a Windows installer and checked that it starts and serves the app, but it is unsigned (Windows will warn about an unknown publisher), the macOS and Linux builds were not tried, and nothing has been uploaded to GitHub Releases yet. Run it from source for now.
+- **Grounding is advice, not a fence.** The model is told to use your sources and to cite them, and the app flags a citation that the model invented ("not in your sources") or whose sentence shares almost no words with the passage (a "?"). That is a word-overlap check, not understanding: it can miss a wrong citation and can flag a good one. I've run lessons, practice and review end to end with DeepSeek V4.1 Flash, but that's a handful of runs, not an evaluation. When a notes library is bigger than fits (about 24k characters), the passages most relevant to your opening message are chosen, and the Sources card says what was left out.
+- **Review is a fixed schedule** (1, 3, 7, 14, 30, 60 days). Days follow your computer's current time zone, but I can't know about a daylight-saving change between now and a due date. It is a convention, not proof it helps you remember.
+- **No OCR** for scanned PDFs or images, and web import reads one page at a time (no site crawling, and pages that need JavaScript to show their text may come out empty).
+- **The name "Reasonloom"** has no hits for an existing product in my searches, and the npm and PyPI names are free, but I have not done a trademark search, and reasonloom.com and reasonloom.ai already have DNS records, so they are probably taken.
+- The macOS icon, DMG art and Windows/Linux icons are now Reasonloom's. I could not build or open the macOS parts on Windows, so those are untested.
 
 ## More
 

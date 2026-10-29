@@ -53,6 +53,9 @@ export function readSourceIndex(): SourceMeta[] {
 			passages: isNum(r.passages) ? r.passages : 0,
 			revision: isNum(r.revision) ? r.revision : 1,
 			subjectId: isString(r.subjectId) ? r.subjectId : null,
+			...(r.kind === "pdf" || r.kind === "web" || r.kind === "text" ? { kind: r.kind } : {}),
+			...(isString(r.origin) ? { origin: r.origin } : {}),
+			...(isNum(r.pages) ? { pages: r.pages } : {}),
 			addedAt: isString(r.addedAt) ? r.addedAt : "",
 			updatedAt: isString(r.updatedAt) ? r.updatedAt : "",
 		});

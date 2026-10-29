@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reasonloom DMG window art, 540x380. The two icon slots sit at (130,190) and (410,190);
+     the arrow runs between them. Regenerate with `node scripts/make-icons.mjs`. -->
+<svg width="540" height="380" viewBox="0 0 540 380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b2526"/>
+      <stop offset="1" stop-color="#131b1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="380" fill="url(#bg)"/>
+  <!-- faint woven grid behind everything -->
+  <g stroke="#405554" stroke-opacity="0.35" stroke-width="1">
+    <path d="M0 95H540M0 190H540M0 285H540"/>
+    <path d="M135 0V380M270 0V380M405 0V380"/>
+  </g>
+  <!-- wordmark -->
+  <text x="270" y="64" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" letter-spacing="-0.8" fill="#eeeae1">Reasonloom</text>
+  <text x="270" y="86" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#a1b0ae">Weave ideas into understanding.</text>
+  <!-- arrow between the slots -->
+  <g stroke="#8bd5c2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M200 190H340"/>
+    <path d="M322 172L340 190L322 208"/>
+  </g>
+  <text x="270" y="300" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="14" fill="#a1b0ae">Drag Reasonloom into Applications</text>
+</svg>

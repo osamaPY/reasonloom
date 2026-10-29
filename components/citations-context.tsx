@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { CitationTarget } from "@/src/core";
+import { citationLabelOf, type CitationTarget } from "@/src/core";
 
 /**
  * Fork: the session's label -> passage map (see core/source-context.ts),
@@ -38,7 +38,7 @@ function RoutedBoundary({ citations, children }: { citations: Readonly<Record<st
 	const onClickCapture = useCallback(
 		(e: React.MouseEvent) => {
 			const link = (e.target as HTMLElement).closest('[data-streamdown="link"]');
-			const target = link ? citations[link.textContent?.trim() ?? ""] : undefined;
+			const target = link ? citations[citationLabelOf(link.textContent ?? "")] : undefined;
 			if (!target) return;
 			e.preventDefault();
 			e.stopPropagation();

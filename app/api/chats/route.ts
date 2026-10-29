@@ -28,7 +28,8 @@ export async function POST(req: Request) {
 	// A session started from a subject (fork): validate BEFORE creating, so a bad
 	// subject never leaves an orphan session behind.
 	const subjectId = typeof body.subjectId === "string" && body.subjectId !== "" ? body.subjectId : null;
-	const sourceMarker = subjectId ? sourceContextMarkerFor(subjectId) : null;
+	// The opening message ranks which passages fit when the library exceeds the budget.
+	const sourceMarker = subjectId ? sourceContextMarkerFor(subjectId, title) : null;
 	if (sourceMarker && !sourceMarker.ok) return Response.json({ error: sourceMarker.error }, { status: sourceMarker.error === "subject_archived" ? 409 : 404 });
 	const chat = createChat(titleFromPrompt(title || "Untitled session"), kind);
 	// PER-SESSION MODELS (owner, 2026-09-28): a session owns its model +

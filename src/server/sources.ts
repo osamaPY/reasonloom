@@ -6,9 +6,12 @@ import {
 	normalizeText,
 	sourceName,
 	splitPassages,
+	type SourceKind,
 	type SourceMeta,
 	type SourceRejection,
 } from "../core/sources.ts";
+import { extractPdfText, PDF_MAX_BYTES } from "./pdf-import.ts";
+import { importWebPage } from "./web-import.ts";
 import { deleteSourceText, readSourceIndex, readSourceText, writeSourceIndex, writeSourceText } from "../store/sources.ts";
 import { readSubjects } from "../store/subjects.ts";
 
@@ -17,12 +20,25 @@ export { readSourceIndex, readSourceText, SOURCE_MAX_FILES_PER_REQUEST };
 export type IngestOutcome =
 	| { name: string; status: "added" | "updated"; id: string }
 	| { name: string; status: "duplicate"; id: string }
-	| { name: string; status: "rejected"; reason: SourceRejection | "write_failed" };
+	| { name: string; status: "rejected"; reason: SourceRejection | ImportFailure | "write_failed" };
+
+/** Reasons specific to PDFs and web pages. */
+export type ImportFailure = "bad_pdf" | "no_text_layer" | "too_many_pages" | "bad_url" | "bad_scheme" | "credentials" | "blocked_host" | "fetch_failed" | "http_error" | "too_many_redirects" | "unsupported_content" | "not_readable";
+
+interface FileInput {
+	name: string;
+	/** Byte size of the TEXT that will be stored. */
+	bytes: number;
+	text: string;
+	kind?: SourceKind;
+	origin?: string;
+	pages?: number;
+}
 
 /** One file at a time: re-read the index per file so a later file's
  * duplicate check sees an earlier file from the same batch. A failure on one
  * file never aborts the rest. */
-export function ingestSource(file: { name: string; bytes: number; text: string }): IngestOutcome {
+export function ingestSource(file: FileInput): IngestOutcome {
 	const name = sourceName(file.name);
 	const text = normalizeText(file.text);
 	const sha256 = createHash("sha256").update(text).digest("hex");
@@ -31,7 +47,15 @@ export function ingestSource(file: { name: string; bytes: number; text: string }
 	if (decision.kind === "reject") return { name, status: "rejected", reason: decision.reason };
 	if (decision.kind === "duplicate") return { name, status: "duplicate", id: decision.existingId };
 	const now = new Date().toISOString();
-	const stats = { sha256, bytes: file.bytes, chars: text.length, passages: splitPassages(text).length };
+	const stats = {
+		sha256,
+		bytes: file.bytes,
+		chars: text.length,
+		passages: splitPassages(text).length,
+		...(file.kind && file.kind !== "text" ? { kind: file.kind } : {}),
+		...(file.origin ? { origin: file.origin } : {}),
+		...(file.pages ? { pages: file.pages } : {}),
+	};
 	try {
 		if (decision.kind === "add") {
 			const id = randomUUID();
@@ -55,6 +79,22 @@ export function ingestSource(file: { name: string; bytes: number; text: string }
 	} catch {
 		return { name, status: "rejected", reason: "write_failed" };
 	}
+}
+
+/** A PDF file: extract its text layer (no OCR), then store it like any source. */
+export async function ingestPdfFile(file: { name: string; data: Uint8Array }): Promise<IngestOutcome> {
+	const name = sourceName(file.name);
+	if (file.data.length > PDF_MAX_BYTES) return { name, status: "rejected", reason: "too_large" };
+	const pdf = await extractPdfText(file.data);
+	if (!pdf.ok) return { name, status: "rejected", reason: pdf.reason };
+	return ingestSource({ name, bytes: Buffer.byteLength(pdf.text), text: pdf.text, kind: "pdf", pages: pdf.pages });
+}
+
+/** A web page (or PDF/text file behind a URL): fetch under the network guard, convert, store. */
+export async function ingestUrl(rawUrl: string): Promise<IngestOutcome> {
+	const got = await importWebPage(rawUrl);
+	if (!got.ok) return { name: rawUrl.slice(0, 200), status: "rejected", reason: got.reason };
+	return ingestSource({ name: got.name, bytes: Buffer.byteLength(got.text), text: got.text, kind: got.kind === "text" ? "web" : got.kind, origin: got.origin, pages: got.pages });
 }
 
 export type SourceUpdateResult = { ok: true; source: SourceMeta } | { ok: false; error: "not_found" | "subject_not_found" | "subject_archived" };
@@ -81,4 +121,29 @@ export function removeSource(id: string): boolean {
 	writeSourceIndex(index.filter((s) => s.id !== id));
 	deleteSourceText(id);
 	return true;
+}
+
+/** Re-derive each source's passage count from its stored text. The passage
+ * rules can change between versions (e.g. displayed formulas now stay with
+ * their sentence); the counts shown must describe what the viewer and the
+ * model will actually see. Writes the index only when something changed. */
+export function refreshSourceStats(): SourceMeta[] {
+	const index = readSourceIndex();
+	let changed = false;
+	const next = index.map((s) => {
+		const text = readSourceText(s.id);
+		if (text === null) return s;
+		const passages = splitPassages(text).length;
+		if (passages === s.passages) return s;
+		changed = true;
+		return { ...s, passages };
+	});
+	if (changed) {
+		try {
+			writeSourceIndex(next);
+		} catch {
+			/* a read-only data dir still gets the corrected numbers this once */
+		}
+	}
+	return next;
 }

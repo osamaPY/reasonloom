@@ -23,7 +23,7 @@ describe("ToolContentResponse citations", () => {
 	it("leaves unknown labels as plain text", () => {
 		const html = render("Made up [S9.P9].", true);
 		assert.ok(!html.includes('data-streamdown="link"'));
-		assert.ok(html.includes("[S9.P9]"));
+		assert.ok(html.includes("S9.P9 — not in your sources"));
 	});
 
 	it("is a no-op outside a grounded session", () => {

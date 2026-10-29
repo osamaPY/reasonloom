@@ -29,7 +29,10 @@
  *    This is a scheduling convention, NOT evidence that it improves
  *    retention.
  *
- * Days are UTC days (a documented limit: no per-learner time zone yet).
+ * Days are the learner's local days, taken as a fixed UTC offset (minutes) the
+ * client passes in (default 0 = UTC). A fixed offset cannot know about a daylight-
+ * saving change between now and a due date, so a date may land an hour off the
+ * local midnight; the displayed calendar day is still right.
  */
 
 import type { AssistantMessage, ToolResultMessage } from "@earendil-works/pi-ai";
@@ -181,7 +184,9 @@ export interface ConceptReview {
 	reason: string;
 }
 
-export const startOfUtcDay = (ms: number): number => Math.floor(ms / DAY_MS) * DAY_MS;
+/** Start of the calendar day containing `ms`, for a fixed offset (minutes east of UTC). */
+export const startOfDay = (ms: number, offsetMin = 0): number => Math.floor((ms + offsetMin * 60_000) / DAY_MS) * DAY_MS - offsetMin * 60_000;
+export const startOfUtcDay = (ms: number): number => startOfDay(ms, 0);
 
 export function intervalDays(box: number): number {
 	return BOX_INTERVAL_DAYS[Math.min(box, BOX_INTERVAL_DAYS.length - 1)]!;
@@ -210,24 +215,24 @@ const OUTCOME_TEXT: Record<AttemptOutcome, string> = {
 	dismissed: "dismissed",
 };
 
-const fmtDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+const fmtDay = (ms: number, offsetMin = 0) => new Date(ms + offsetMin * 60_000).toISOString().slice(0, 10);
 
-function explain(r: Omit<ConceptReview, "reason">, now: number): string {
+function explain(r: Omit<ConceptReview, "reason">, now: number, off: number): string {
 	const last = r.usable[r.usable.length - 1]!;
-	const parts = [`Last attempt (${fmtDay(last.at)}): ${OUTCOME_TEXT[last.outcome]}`];
+	const parts = [`Last attempt (${fmtDay(last.at, off)}): ${OUTCOME_TEXT[last.outcome]}`];
 	if (last.outcome === "solvedWithHints" && last.rung) parts[0] += ` (hint level ${last.rung})`;
 	parts.push(`${r.usable.length} usable ${r.usable.length === 1 ? "attempt" : "attempts"}, box ${r.box}`);
-	if (r.postponed) parts.push(`postponed to ${fmtDay(r.due)}`);
+	if (r.postponed) parts.push(`postponed to ${fmtDay(r.due, off)}`);
 	else if (r.due <= now) {
-		const late = Math.floor((startOfUtcDay(now) - startOfUtcDay(r.due)) / DAY_MS);
-		parts.push(late > 0 ? `due ${fmtDay(r.due)}, ${late} ${late === 1 ? "day" : "days"} overdue` : "due today");
-	} else parts.push(`due ${fmtDay(r.due)}`);
+		const late = Math.round((startOfDay(now, off) - startOfDay(r.due, off)) / DAY_MS);
+		parts.push(late > 0 ? `due ${fmtDay(r.due, off)}, ${late} ${late === 1 ? "day" : "days"} overdue` : "due today");
+	} else parts.push(`due ${fmtDay(r.due, off)}`);
 	return parts.join("; ") + ".";
 }
 
 /** Per-concept review state from the attempts and the learner's events.
  * Concepts with no usable attempt are omitted (unassessed). */
-export function scheduleConcepts(attempts: readonly Attempt[], events: readonly ReviewEvent[], now: number): ConceptReview[] {
+export function scheduleConcepts(attempts: readonly Attempt[], events: readonly ReviewEvent[], now: number, offsetMin = 0): ConceptReview[] {
 	const disputed = disputedIds(events);
 	const byConcept = new Map<string, Attempt[]>();
 	for (const a of [...attempts].sort((x, y) => x.at - y.at || x.id.localeCompare(y.id))) {
@@ -246,7 +251,7 @@ export function scheduleConcepts(attempts: readonly Attempt[], events: readonly 
 			.reduce((m, e) => Math.max(m, e.until), 0);
 		const due = Math.max(scheduledDue, hold);
 		const base = { concept, usable, box, lastAt, scheduledDue, due, postponed: hold > scheduledDue };
-		out.push({ ...base, reason: explain(base, now) });
+		out.push({ ...base, reason: explain(base, now, offsetMin) });
 	}
 	return out.sort((a, b) => a.due - b.due || a.concept.localeCompare(b.concept));
 }
@@ -256,10 +261,10 @@ export function splitQueue(reviews: readonly ConceptReview[], now: number): { du
 }
 
 /** Postpone by 1, 3 or 7 days. The new date is anchored on the later of the
- * concept's current due date and today, snapped to a UTC day, so pressing it
+ * concept's current due date and today, snapped to a local day, so pressing it
  * twice the same day yields the same date instead of drifting further. */
-export function postponeEvent(review: ConceptReview, days: number, now: number): Extract<ReviewEvent, { kind: "postpone" }> | null {
+export function postponeEvent(review: ConceptReview, days: number, now: number, offsetMin = 0): Extract<ReviewEvent, { kind: "postpone" }> | null {
 	if (!(POSTPONE_CHOICES as readonly number[]).includes(days)) return null;
-	const anchor = startOfUtcDay(Math.max(review.scheduledDue, now));
+	const anchor = startOfDay(Math.max(review.scheduledDue, now), offsetMin);
 	return { kind: "postpone", concept: review.concept, until: anchor + days * DAY_MS, at: now };
 }

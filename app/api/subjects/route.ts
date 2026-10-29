@@ -1,4 +1,4 @@
-import { createSubjectRecord, listChats, readSubjects } from "@/src/server";
+import { createSubjectRecord, groundedChatIds, listChats, readSubjects } from "@/src/server";
 import { groupSessions } from "@/src/core";
 
 export const dynamic = "force-dynamic";
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
 	const record = readSubjects();
 	const { bySubject, ungrouped } = groupSessions(record, listChats().map((c) => c.id));
-	return Response.json({ subjects: record.subjects, sessions: bySubject, ungrouped });
+	return Response.json({ subjects: record.subjects, sessions: bySubject, ungrouped, grounded: groundedChatIds() });
 }
 
 export async function POST(req: Request) {

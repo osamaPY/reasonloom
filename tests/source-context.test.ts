@@ -90,8 +90,11 @@ describe("linkCitations", () => {
 		assert.equal((out.match(/\]\(\/sources/g) ?? []).length, 2);
 	});
 
-	it("leaves unknown labels exactly as written", () => {
-		assert.equal(linkCitations("Made up [S9.P9] and [S1.P7].", citations), "Made up [S9.P9] and [S1.P7].");
+	it("never links an unknown label and says it was not given to the model", () => {
+		assert.equal(
+			linkCitations("Made up [S9.P9] and [S1.P7].", citations),
+			"Made up [S9.P9 — not in your sources] and [S1.P7 — not in your sources].",
+		);
 	});
 
 	it("does not touch already-linked labels, inline code or fenced code", () => {

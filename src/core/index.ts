@@ -54,6 +54,7 @@ export * from "./prices.ts";
 export * from "./subjects.ts";
 export * from "./sources.ts";
 export * from "./source-context.ts";
+export * from "./text-match.ts";
 export * from "./math-text.ts";
 export * from "./reviews.ts";
 export * from "./context-usage.ts";

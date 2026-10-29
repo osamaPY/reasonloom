@@ -16,6 +16,8 @@ interface SubjectsPayload {
 	subjects: Subject[];
 	sessions: Record<string, string[]>;
 	ungrouped: string[];
+	/** Sessions whose record already carries a source-context marker. */
+	grounded: string[];
 }
 
 const ERROR_TEXT: Record<string, string> = {
@@ -25,6 +27,8 @@ const ERROR_TEXT: Record<string, string> = {
 	duplicate_name: "A subject with that name already exists (archived ones count).",
 	not_found: "That subject no longer exists.",
 	subject_archived: "Restore the subject before adding sessions to it.",
+	turn_running: "Wait for that session's current reply to finish, then try again.",
+	no_sources: "That subject has no sources yet. Add some on the Sources page first.",
 };
 
 export function SubjectsView() {
@@ -87,6 +91,17 @@ export function SubjectsView() {
 				))}
 				{subject?.archived && <option value={subject.id}>{subject.name} (archived)</option>}
 			</select>
+			{subject && !subject.archived && sources.some((src) => src.subjectId === subject.id) && (
+				<button
+					type="button"
+					data-testid="ground-session"
+					title={data?.grounded.includes(id) ? "Re-read this subject's sources into the session" : "Give the model this subject's sources from its next reply on"}
+					onClick={() => void send("/api/subjects/ground", "POST", { chatId: id, subjectId: subject.id })}
+					className="shrink-0 rounded-md border px-2 py-1 font-ui text-xs hover:bg-accent"
+				>
+					{data?.grounded.includes(id) ? "Grounded · refresh" : "Use sources"}
+				</button>
+			)}
 		</li>
 	);
 
