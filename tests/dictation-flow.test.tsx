@@ -150,7 +150,7 @@ test("waits for the saved language; reconnect preserves it and finals still flus
 	await act(async () => { first.end(1006); });
 	const second = Socket.all[1]!;
 	assert.equal(second.language, "pl");
-	assert.deepEqual(second.protocols, ["bearer", "test-token"]);
+	assert.deepEqual(second.protocols, ["token", "test-token"]);
 	await act(async () => { second.open(); second.final("świecie"); });
 	await act(async () => { f.dictation.stop(); });
 	assert.equal(f.dictation.phase, "stopping");

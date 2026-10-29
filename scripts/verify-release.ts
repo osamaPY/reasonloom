@@ -105,7 +105,7 @@ type Issues = Issue[];
 // ---------------------------------------------------------------------------
 
 /** Verified product name spelled into every artifact (electron-builder.yml productName). */
-const PRODUCT_NAME = "LearnHarness";
+const PRODUCT_NAME = "LearnHarness-Fork";
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 
@@ -259,24 +259,26 @@ export function verifyConfigAssumptions(config: unknown, pkg: unknown): { ok: tr
 	const errors: Issues = [];
 	const bad = (message: string) => errors.push(message);
 	if (!isPlainObject(pkg) || typeof pkg.version !== "string") bad("package.json has no string version");
-	if (!isPlainObject(pkg) || pkg.name !== "learnharness") bad("package.json name is no longer \"learnharness\"");
+	if (!isPlainObject(pkg) || pkg.name !== "learnharness-fork") bad("package.json name is no longer \"learnharness-fork\"");
 	if (!isPlainObject(config)) {
 		return { ok: false, errors: ["electron-builder.yml did not parse to a mapping", ...errors] };
 	}
-	if (config.productName !== PRODUCT_NAME) bad(`productName is ${JSON.stringify(config.productName)}, expected "${PRODUCT_NAME}"`);
+	if (config.productName !== "LearnHarness Fork") bad(`productName is ${JSON.stringify(config.productName)}, expected "LearnHarness Fork"`);
+	if (config.appId !== "io.github.osamapy.learnharnessfork" || config.executableName !== "learnharness-fork") bad("fork identity drifted — expected names no longer hold");
+	if (!isPlainObject(config.dmg) || config.dmg.artifactName !== "LearnHarness-Fork-${version}-${arch}.${ext}") bad("dmg.artifactName changed — expected names no longer hold");
 	if (config.artifactName != null) bad("a top-level artifactName now overrides target defaults — expected names no longer hold");
 	const sameTargets = (actual: unknown, expected: Array<Record<string, unknown>>) =>
 		JSON.stringify(actual) === JSON.stringify(expected);
 	if (!isPlainObject(config.mac)) bad("mac section missing");
 	else {
-		if (config.mac.artifactName != null) bad("mac.artifactName set — expected names no longer hold");
+		if (config.mac.artifactName !== "LearnHarness-Fork-${version}-${arch}-mac.${ext}") bad("mac.artifactName changed — expected names no longer hold");
 		if (!sameTargets(config.mac.target, [{ target: "dmg", arch: ["arm64"] }, { target: "zip", arch: ["arm64"] }])) {
 			bad(`mac.target changed (${JSON.stringify(config.mac.target)}) — expected names no longer hold`);
 		}
 	}
 	if (!isPlainObject(config.win)) bad("win section missing");
 	else {
-		if (config.win.artifactName !== "${productName}-${version}-${arch}-setup.${ext}") {
+		if (config.win.artifactName !== "LearnHarness-Fork-${version}-${arch}-setup.${ext}") {
 			bad(`win.artifactName changed (${JSON.stringify(config.win.artifactName)}) — expected names no longer hold`);
 		}
 		if (!sameTargets(config.win.target, [{ target: "nsis", arch: ["x64"] }])) {
@@ -285,7 +287,7 @@ export function verifyConfigAssumptions(config: unknown, pkg: unknown): { ok: tr
 	}
 	if (!isPlainObject(config.linux)) bad("linux section missing");
 	else {
-		if (config.linux.artifactName !== "${productName}-${version}-${arch}.${ext}") {
+		if (config.linux.artifactName !== "LearnHarness-Fork-${version}-${arch}.${ext}") {
 			bad(`linux.artifactName changed (${JSON.stringify(config.linux.artifactName)}) — expected names no longer hold`);
 		}
 		if (!sameTargets(config.linux.target, [{ target: "AppImage", arch: ["x64"] }, { target: "deb", arch: ["x64"] }])) {
@@ -293,7 +295,7 @@ export function verifyConfigAssumptions(config: unknown, pkg: unknown): { ok: tr
 		}
 	}
 	const publish = Array.isArray(config.publish) ? config.publish[0] : undefined;
-	if (!isPlainObject(publish) || publish.provider !== "github" || publish.releaseType !== "draft") {
+	if (!isPlainObject(publish) || publish.provider !== "github" || publish.releaseType !== "draft" || publish.owner !== "osamaPY" || publish.repo !== "learnharness-fork") {
 		bad(`publish[0] must be the github provider with releaseType "draft" (${JSON.stringify(config.publish)}) — uploads would not land in the draft`);
 	}
 	if (errors.length > 0) {

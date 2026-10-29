@@ -111,6 +111,15 @@ export const GRAPH_FORMAT_FILE = path.join(PATHS.graph, "format.json");
  */
 export const SETTINGS_FILE = path.join(DATA_ROOT, "settings.json");
 
+/** Subjects + session assignments (fork, P03): one small JSON file beside settings.json. */
+export const SUBJECTS_FILE = path.join(DATA_ROOT, "subjects.json");
+
+/** Source library (fork, P04): sources/index.json + sources/<id>.txt (normalised text). */
+export const SOURCES_DIR = path.join(DATA_ROOT, "sources");
+
+/** Review events (fork, P05): postponements and grading disputes. */
+export const REVIEWS_FILE = path.join(DATA_ROOT, "reviews.json");
+
 /**
  * User prompt-override files (settings-storage wave, 2026-09-19): the
  * per-segment system-prompt overrides mirroring the SOURCE layout

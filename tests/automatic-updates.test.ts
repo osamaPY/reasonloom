@@ -24,6 +24,8 @@ function fixture({ packaged = true, updaterMissing = false } = {}) {
 	let userData = "/fixture/custom-user-data";
 	let menu: { submenu?: { label?: string; click?: () => void }[] }[] = [];
 	class FakeUpdater extends EventEmitter {
+		feeds: unknown[] = [];
+		setFeedURL(feed: unknown) { this.feeds.push(JSON.parse(JSON.stringify(feed))); }
 		checks = 0;
 		autoDownload = false;
 		autoInstallOnAppQuit = false;
@@ -121,13 +123,18 @@ function fixture({ packaged = true, updaterMissing = false } = {}) {
 }
 
 describe("automatic-update preference gate", () => {
+	it("packaged updates use the fork repository, never an inherited upstream feed", () => {
+		const f = fixture();
+		f.run("setupAutoUpdater()");
+		assert.deepEqual(f.updater.feeds, [{ provider: "github", owner: "osamaPY", repo: "learnharness-fork" }]);
+	});
 	it("explicit OFF skips automatic checks, but manual checks still run without reading the preference", async () => {
 		const f = fixture();
 		f.setSettings({ general: { autoUpdate: false } });
 		f.run("setupAutoUpdater()");
 		await f.check();
 		assert.equal(f.updater.checks, 0);
-		assert.deepEqual(f.settingsReads, ["/fixture/custom-user-data-dev/data/settings.json"]);
+		assert.deepEqual(f.settingsReads, [path.join("/fixture/custom-user-data-dev", "data", "settings.json")]);
 		await f.check(true);
 		assert.equal(f.updater.checks, 1);
 		assert.equal(f.settingsReads.length, 1);

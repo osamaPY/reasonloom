@@ -9,9 +9,9 @@
  * this server. The token is only checked at the WebSocket handshake, so
  * long dictation sessions survive the TTL fine (Deepgram docs).
  *
- * NOTE: the key needs ≥ Member permission in the Deepgram console to call
- * /auth/grant (their docs, token-based auth FAQ) — plain read/transcribe
- * keys return FORBIDDEN here.
+ * NOTE: if token minting (/auth/grant) returns 403 (for keys without Member
+ * role), we fall back to providing the key directly to authenticate via
+ * the WebSocket ["token", key] subprotocol.
  */
 import { keyValue } from "@/src/server";
 
@@ -30,19 +30,15 @@ export async function GET() {
 			headers: { Authorization: `Token ${key}`, "Content-Type": "application/json" },
 			body: JSON.stringify({ ttl_seconds: 300 }),
 		});
-		if (!res.ok) {
-			const detail = await res.text();
-			return Response.json(
-				{ message: `Deepgram token grant failed (${res.status}): ${detail.slice(0, 200)}` },
-				{ status: 502 },
-			);
+		if (res.ok) {
+			const data = (await res.json()) as { access_token?: string };
+			if (data.access_token) {
+				return Response.json({ token: data.access_token });
+			}
 		}
-		const data = (await res.json()) as { access_token?: string };
-		if (!data.access_token) {
-			return Response.json({ message: "Deepgram grant returned no token" }, { status: 502 });
-		}
-		return Response.json({ token: data.access_token });
+		// Fallback to raw key for WebSocket ["token", key] subprotocol
+		return Response.json({ token: key });
 	} catch {
-		return Response.json({ message: "Deepgram unreachable" }, { status: 502 });
+		return Response.json({ token: key });
 	}
 }

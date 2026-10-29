@@ -371,7 +371,8 @@ export function useDictation({ append }: { append: (text: string) => void }): Di
 			// Minted JWTs authenticate via the "bearer" subprotocol — ["token",
 			// jwt] is rejected at the handshake (verified live; "token" is for
 			// raw API keys only, as in the owner's pi dictate extension).
-			const ws = new WebSocket(deepgramListenUrl(language), ["bearer", token]);
+			const subproto = token.startsWith("ey") ? "bearer" : "token";
+			const ws = new WebSocket(deepgramListenUrl(language), [subproto, token]);
 			wsRef.current = ws;
 
 			ws.addEventListener("open", () => {

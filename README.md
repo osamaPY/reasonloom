@@ -9,12 +9,39 @@
 <p align="center"><strong>An agent harness for learning.</strong></p>
 
 <p align="center">
-  <a href="https://learnharness.ai">Download</a> ·
+  <a href="https://learnharness.ai">Upstream downloads</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="docs/development.md">Documentation</a> ·
-  <a href="https://github.com/amosblomqvist/learnharness/issues">Issues</a> ·
+  <a href="https://github.com/osamaPY/learnharness-fork/issues">Fork issues</a> ·
   <a href="https://discord.gg/5tCHHQEB2e">Discord</a>
 </p>
+
+This project is a fork of [LearnHarness](https://github.com/amosblomqvist/learnharness), originally created by Amos Blomqvist. I liked its approach to adaptive AI-assisted learning and wanted to build on that foundation with my own improvements. Full credit to Amos Blomqvist and the original contributors for the foundation. The teaching engine, knowledge graph, practice, dictation, provider support, and desktop shell below come from upstream, not this fork. Download, issue, and community links on this page currently point to the **original project**; this fork has no independent release yet.
+
+## What this fork changes (working)
+
+- Updated the local development baseline from upstream 0.3.9 to its 0.4.0-preparation revision while retaining existing local edits. Upstream's new provider, Claude Code, file-path, and image capabilities are **inherited**, not fork-authored features.
+- Made existing automated tests run on Windows by using native paths and file URLs, adapting test fixtures to retained local changes, and excluding POSIX-only file-mode and signal assertions on Windows. The 0.4.0-preparation suite, typecheck, lint, and production build pass under the conditions recorded in the [fork roadmap](docs/FORK_ROADMAP.md). These are development and verification changes, not new learner-facing features.
+- Set the browser and desktop display name to **LearnHarness Fork**, with an independent application ID, executable, and desktop data directory. The original application's data is not migrated or modified. Development-shell data uses a separate `LearnHarness Fork-dev` profile; ordinary web development retains its configured data directory.
+- Directed installer publishing and packaged update checks to `osamaPY/learnharness-fork`, with distinct installer names and release-validation checks. No fork installer or update has been published or tested on a real installed copy yet.
+- Removed hardcoded credential assignments from the local Windows launch helpers. Configure providers in Settings or through your own environment; do not add credentials to these scripts.
+- Retained earlier local Deepgram and Electron edits and Windows launch helpers for further review; their behavior has not been approved or verified as a fork release feature.
+
+## Fork learning workspace (implemented, early)
+
+These pages are new in this fork and are reachable from the sidebar. They are working but early; each has automated tests and a browser check on an isolated data folder, and none has been used in a long real-world study session yet.
+
+- **Subjects** (`/subjects`): create subjects with a goal, rename, archive and restore them, and move sessions between them. A session belongs to at most one subject. Subjects are archived, never deleted.
+- **Sources** (`/sources`): keep `.md`, `.markdown` and `.txt` notes (up to 1 MiB each) as a local text library. Duplicates are detected; a changed file with the same name updates in place (the old text is not kept). Each passage has a stable link that reports when the passage moved or was edited. Nothing is sent to a model, and this library is separate from the original "Import notes" graph extraction.
+- **Review** (`/review`): finished practice problems become attempts; concepts return on a fixed schedule (1, 3, 7, 14, 30, 60 days) with a plain-language reason. You can postpone an item or flag a grade as wrong. The schedule is a simple convention, not evidence that it improves retention.
+- **Sample workspace**: on an empty Subjects page, "Load the sample workspace" creates clearly labelled synthetic data (a subject, a source, and a scripted practice record) so the path can be explored without a provider. No model produced it.
+- **Dashboard card**: when graph rendering is turned off, the minimal home shows a Continue card and a start guide.
+
+Known limits: lessons and questions do not yet link back to source passages; sources are not yet fed to the knowledge graph or used to restrict practice; review does not start a fresh problem for you; review days are UTC; PDFs, URLs and OCR are not supported in the library; there is no backup/restore, export, or per-subject filter in the sidebar session list. Practice attempts were verified on scripted records shaped like the real tool output, not on a live model session.
+
+## Planned, not implemented
+
+Source-grounded lessons and practice, richer imports, exam and teach-back modes, study exports and backups, the experimental learning ideas, and a published fork release remain plans in the [fork roadmap](docs/FORK_ROADMAP.md). Nothing has been published. Follow the [live build progress](docs/BUILD_PROGRESS.md) for completed patches, test evidence, and remaining verification.
 
 LearnHarness uses AI agents to plan and teach lessons from your current understanding to your goal. It builds a detailed picture of what you understand and how you reason. That picture is updated as you learn.
 

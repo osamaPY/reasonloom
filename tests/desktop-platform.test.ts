@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { describe, it } from "node:test";
@@ -31,6 +31,7 @@ function windowOptions(platform: string, env: Record<string, string> = {}) {
 		require: (id: string) => id === "electron" ? electron : mainRequire(id),
 		process: { platform, argv: [], env, on() {} },
 		__dirname: dirname(mainFile),
+		setTimeout: () => 0,
 	};
 	runInNewContext(mainSource, context, { filename: mainFile });
 	const win = runInNewContext('createWindow("http://127.0.0.1:9000")', context) as FakeWindow;
@@ -39,6 +40,31 @@ function windowOptions(platform: string, env: Record<string, string> = {}) {
 }
 
 describe("desktop window chrome", () => {
+	for (const dev of [false, true]) {
+		it(`fork ${dev ? "development" : "packaged"} profile is isolated before acquiring its instance lock`, () => {
+			let name = "LearnHarness";
+			let profile: string | undefined;
+			let lockedProfile = "";
+			const getProfile = () => profile ?? join("/fixture/app-data", name);
+			const app = {
+				setName(value: string) { name = value; },
+				getPath: () => getProfile(),
+				setPath(_: string, value: string) { profile = value; },
+				requestSingleInstanceLock() { lockedProfile = getProfile(); return false; }, quit() {},
+			};
+			const context = {
+				require: (id: string) => id === "electron" ? { app } : mainRequire(id),
+				process: { platform: "win32", argv: [], env: dev ? { LH_DEV_URL: "http://localhost:3000" } : {}, on() {} },
+				__dirname: dirname(mainFile),
+			};
+			runInNewContext(mainSource, context, { filename: mainFile });
+			const expected = join("/fixture/app-data", `LearnHarness Fork${dev ? "-dev" : ""}`);
+			assert.equal(name, "LearnHarness Fork");
+			assert.equal(lockedProfile, expected);
+			assert.equal(runInNewContext("DATA_DIR()", context), join(expected, "data"));
+			assert.equal(runInNewContext("AUTH_FILE()", context), join(expected, "auth.json"));
+		});
+	}
 	it("macOS keeps the proven traffic lights and does not enable WCO", () => {
 		const options = windowOptions("darwin");
 		assert.equal(options.titleBarStyle, "hiddenInset");
@@ -144,6 +170,14 @@ describe("desktop packaging policy", () => {
 		const { validateConfiguration } = require("app-builder-lib/out/util/config/config.js");
 		await validateConfiguration(config, { isEnabled: false });
 	});
+	it("builder resolves an independent executable and app bundle name", () => {
+		const { AppInfo } = require("app-builder-lib/out/appInfo.js");
+		const metadata = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+		const info = new AppInfo({ config, metadata });
+		assert.equal(info.productFilename, "learnharness-fork");
+		assert.equal(info.productName, "LearnHarness Fork");
+		assert.equal(info.id, "io.github.osamapy.learnharnessfork");
+	});
 
 	it("ships Mac arm64, Windows NSIS x64, and both Linux x64 channels", () => {
 		assert.deepEqual(config.mac.target, [
@@ -163,8 +197,8 @@ describe("desktop packaging policy", () => {
 		const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 		assert.equal(pkg.author.name, "Amos Blomqvist");
 		assert.equal(pkg.author.email, "255718537+amosblomqvist@users.noreply.github.com");
-		assert.equal(pkg.homepage, "https://github.com/amosblomqvist/learnharness");
-		assert.equal(pkg.desktopName, "learnharness.desktop");
+		assert.equal(pkg.homepage, "https://github.com/osamaPY/learnharness-fork");
+		assert.equal(pkg.desktopName, "learnharness-fork.desktop");
 	});
 });
 

@@ -9,8 +9,9 @@
 #   - signed + notarized since 2026-10-08 (Developer ID Application cert in
 #     the login keychain; notary credentials in the LH_NOTARY keychain
 #     profile; the profile + team env vars are baked into desktop:dist).
-appId: com.learnharness.LearnHarness
-productName: LearnHarness
+appId: io.github.osamapy.learnharnessfork
+productName: LearnHarness Fork
+executableName: learnharness-fork
 directories:
   output: dist
 # Icons (owner ruling, 2026-10-13) — per-platform sources in build/:
@@ -100,6 +101,7 @@ extraResources:
     filter:
       - "standalone/**/*"
 mac:
+  artifactName: "LearnHarness-Fork-${version}-${arch}-mac.${ext}"
   # The backend's --require runs before Next loads. Keep this resource
   # outside app.asar so early Node-mode loading needs no ASAR support.
   extraResources:
@@ -125,7 +127,7 @@ mac:
   # Laid for the STT milestone (researcher-verified): the TCC mic prompt
   # reads this string; macOS asks regardless of Electron's own handlers.
   extendInfo:
-    NSMicrophoneUsageDescription: "LearnHarness uses the microphone only for speech-to-text input into your sessions."
+    NSMicrophoneUsageDescription: "LearnHarness Fork uses the microphone only for speech-to-text input into your sessions."
   hardenedRuntime: true
   entitlements: build/entitlements.mac.plist
   # Signing + notarization (flipped 2026-10-08): identity auto-detects the
@@ -137,6 +139,7 @@ mac:
   # codesign --verify --deep / spctl --assess / stapler validate.
   notarize: true
 dmg:
+  artifactName: "LearnHarness-Fork-${version}-${arch}.${ext}"
   title: "${productName} ${version}"
   # Owner artwork: 540×380 at 1×; the sibling background@2x.png is
   # combined into a Retina TIFF by dmg-builder. Centres use 1× coordinates.
@@ -157,7 +160,7 @@ win:
     - target: nsis
       arch:
         - x64
-  artifactName: "${productName}-${version}-${arch}-setup.${ext}"
+  artifactName: "LearnHarness-Fork-${version}-${arch}-setup.${ext}"
   # Unsigned Windows release (owner ruling): preserve icon/version metadata,
   # skip signing, and do not require a publisher signature for updates.
   signExecutable: false
@@ -174,7 +177,7 @@ linux:
     - target: deb
       arch:
         - x64
-  artifactName: "${productName}-${version}-${arch}.${ext}"
+  artifactName: "LearnHarness-Fork-${version}-${arch}.${ext}"
   category: Education
   # Match Electron's app_id/WM_CLASS to the installed desktop launcher.
   syncDesktopName: true
@@ -188,7 +191,7 @@ publish:
   # would be a leak. desktop:dist passes no --publish flag, so builds never
   # upload; publishing happens at release time (GH_TOKEN + --publish).
   - provider: github
-    owner: amosblomqvist
-    repo: learnharness
+    owner: osamaPY
+    repo: learnharness-fork
     # All three CI jobs contribute assets; only the owner publishes it.
     releaseType: draft

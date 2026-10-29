@@ -42,14 +42,12 @@ const path = require("node:path");
 // renderer owns the number; this is the IPC widen target).
 const SIDEBAR_AUTOCLOSE = 928;
 
-const PRODUCT_NAME = "LearnHarness";
+const PRODUCT_NAME = require("../package.json").productName;
 
 // APP NAME → userData (owner, 2026-10-10): the Application Support dir is
-// exactly "LearnHarness" in dev AND packaged. Packaged Electron would
-// otherwise derive it from package.json "name" (now lowercase
-// "learnharness"), and productName metadata alone doesn't reach app.name.
-// Must run before the LH_DEV_URL suffix below — dev becomes
-// "LearnHarness-dev".
+// follows this fork's productName, never the original LearnHarness profile.
+// productName metadata alone does not reach app.name. Set it before the
+// LH_DEV_URL suffix and single-instance lock; dev uses its own -dev profile.
 app.setName(PRODUCT_NAME);
 const AUTH_FILE = () => path.join(app.getPath("userData"), "auth.json");
 const DATA_DIR = () => path.join(app.getPath("userData"), "data");
@@ -389,7 +387,10 @@ function createWindow(url) {
 		event.preventDefault();
 	});
 
-	win.once("ready-to-show", () => win.show());
+	win.webContents.on("did-finish-load", () => { log("did-finish-load"); win.show(); });
+	win.webContents.on("did-fail-load", (_e, c, d) => { log("did-fail-load: " + c + " " + d); win.show(); });
+	win.once("ready-to-show", () => { log("ready-to-show"); win.show(); });
+	setTimeout(() => { if (!win.isDestroyed() && !win.isVisible()) { log("fallback force show"); win.show(); } }, 1500);
 	return win;
 }
 
@@ -516,6 +517,8 @@ function setupAutoUpdater() {
 		reportUpdateStatus("disabled");
 		return;
 	}
+	// Explicit fork feed also protects bundles carrying stale upstream metadata.
+	autoUpdater.setFeedURL({ provider: "github", owner: "osamaPY", repo: "learnharness-fork" });
 	const feed = process.env.LH_UPDATE_FEED;
 	if (feed) {
 		autoUpdater.setFeedURL({ provider: "generic", url: feed });

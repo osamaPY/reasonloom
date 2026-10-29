@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ListTreeIcon, UploadIcon } from "lucide-react";
 import { ChainTableOverlay } from "@/components/chain-table.tsx";
+import { DashboardPanel } from "@/components/dashboard-panel.tsx";
 import { GraphCostControl } from "@/components/graph-view.tsx";
 import { NotesImportErrors, useNotesImport } from "@/components/notes-import.tsx";
 import { Hint } from "@/components/ui/hint";
@@ -145,7 +146,10 @@ export function MinimalHome({
 			/>
 
 			{/* The quiet summary — centered, biased up off the composer. */}
-			<div className="pointer-events-none flex h-full items-center justify-center pb-40">
+			<div className="pointer-events-none flex h-full flex-col items-center justify-center gap-8 pb-40">
+				<div className="pointer-events-auto flex w-full justify-center">
+					<DashboardPanel chats={chats} />
+				</div>
 				<KnowledgeSummary
 					propositions={snapshot?.propositions.length ?? 0}
 					chains={snapshot?.chains.length ?? 0}
