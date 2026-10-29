@@ -8,19 +8,17 @@
 
 ![Reasonloom branding: icon, wordmark, palette, type](docs/assets/reasonloom/branding.png)
 
-I found [LearnHarness](https://github.com/amosblomqvist/learnharness) by Amos Blomqvist and loved the idea: an AI that teaches you step by step, checks what you actually understand, and keeps a knowledge graph of it. I wanted to take it further, so I forked it and built **Reasonloom**.
+I'm an AI student, and I kept running into the same problem when studying: my notes were in one place, my AI conversations in another, and the things I needed to practise were easy to forget. I found [LearnHarness](https://github.com/amosblomqvist/learnharness) by Amos Blomqvist and liked how it teaches step by step and checks your understanding. **Reasonloom** is my fork, built around the way I wanted to use it for my own studies.
 
-All the hard parts (the teaching engine, the knowledge graph, practice sessions, dictation, provider support, the desktop shell) are Amos's work and are used here under AGPL-3.0. Everything described under "What I added" is mine. This isn't endorsed by him.
+The teaching engine, knowledge graph, practice sessions, dictation, model integrations and desktop foundation come from LearnHarness. My work adds the subjects, source library, source-grounded sessions, review flow and visual identity described below. The original project is licensed under AGPL-3.0; this fork isn't endorsed by its author.
 
 ## What I added
 
-I wanted my notes, my lessons, my practice and my review to live in one place instead of being separate things. So:
-
-- **Subjects**: group sessions by what you're learning.
-- **Sources**: a local library of your own notes.
-- **Source-grounded sessions**: lessons and practice that use your notes and cite them.
-- **Review**: practice attempts come back on a schedule, with the reason shown.
-- **A new look**: new name, mark, colours and typography.
+- **Subjects** keep lessons and practice together for a topic I'm studying.
+- **Sources** let me bring my Markdown and text notes into a local library.
+- **Source-grounded sessions** pass the selected subject's notes to the model and link citations back to the passages it saw. The citations still need checking; they're not proof that an answer is correct.
+- **Review** brings practice attempts back on a simple schedule and shows why they're due.
+- **The Reasonloom identity** gives the fork its own name, icon, colours and typography.
 
 Before and after:
 
