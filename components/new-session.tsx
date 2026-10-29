@@ -14,6 +14,7 @@ import { ChainTableOverlay } from "@/components/chain-table.tsx";
 import { ComposerActions, NodePickerControl } from "@/components/composer-actions";
 import { OPENING_PROMPT_FAILURE } from "@/components/opening-prompt";
 import { SessionStarter } from "@/components/start-session";
+import { SubjectChip } from "@/components/subject-chip";
 import type { ChatSettings, GraphSnapshot } from "@/src/core";
 
 /** The draft's pick set (owner round 10): the SAME shape the home pick
@@ -47,6 +48,7 @@ export async function startDraftSession(
 	picks?: readonly DraftPick[],
 	starter = new SessionStarter(),
 	settingsIdentity?: string,
+	subjectId?: string,
 ): Promise<string | null> {
 	const t = text.trim();
 	if (!t) return null;
@@ -56,8 +58,8 @@ export async function startDraftSession(
 	// [id] name: statement lines, target validation's truth set).
 	return starter.start(
 		mode === "practice"
-			? { title: t, kind: "practice", ...(picks && picks.length > 0 ? { graphContext: { propositions: picks } } : {}) }
-			: { title: t },
+			? { title: t, kind: "practice", ...(picks && picks.length > 0 ? { graphContext: { propositions: picks } } : {}), ...(subjectId ? { subjectId } : {}) }
+			: { title: t, ...(subjectId ? { subjectId } : {}) },
 		fetchLike,
 		settingsIdentity,
 	);
@@ -80,6 +82,7 @@ export function DraftShell({
 	onOpenPicker,
 	onClearPicks,
 	overlay,
+	subjectChip,
 }: {
 	busy: boolean;
 	text: string;
@@ -107,6 +110,8 @@ export function DraftShell({
 	 *  the graph view (the overlay fills its column, never the sidebar).
 	 *  Passed as a node so the pick state stays in NewSession. */
 	overlay?: ReactNode;
+	/** Fork: which subject (and how many sources) this session will start from. */
+	subjectChip?: ReactNode;
 }) {
 	// Voice dictation (STT wave, 2026-09-17): finals append at the end of the
 	// draft text (via the parent's onChange — the truth lives there); the
@@ -188,6 +193,7 @@ export function DraftShell({
 									)}
 									setup={setupCta}
 								/>
+								{subjectChip}
 								{startError && <p role="alert" className="pointer-events-auto mb-2 text-sm text-destructive">{OPENING_PROMPT_FAILURE}</p>}
 								<div className="pointer-events-auto overflow-hidden rounded-2xl border bg-card shadow-lg">
 									<Composer
@@ -229,7 +235,7 @@ export function DraftShell({
 	);
 }
 
-export function NewSession({ initialConfigured, mode = "teach" }: { initialConfigured: boolean; mode?: "teach" | "practice" }) {
+export function NewSession({ initialConfigured, mode = "teach", subjectId }: { initialConfigured: boolean; mode?: "teach" | "practice"; subjectId?: string }) {
 	const router = useRouter();
 	const [text, setText] = useState("");
 	/* The draft MIRROR ("nothing gets lost" round, 2026-10-01): the shell's
@@ -306,7 +312,7 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 		setBusy(true);
 		setStartError(false);
 		void startDraftSession(draft, fetch, mode === "practice" ? "practice" : undefined, mode === "practice" ? picksRef.current : undefined,
-			starterRef.current, JSON.stringify(catalog?.slots.strong))
+			starterRef.current, JSON.stringify(catalog?.slots.strong), subjectId)
 			.then((target) => {
 				if (target) router.push(target);
 				else { startingRef.current = false; setBusy(false); }
@@ -316,7 +322,7 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 				setBusy(false);
 				setStartError(true);
 			});
-	}, [router, configured, zeroKeys, catalog, mode]);
+	}, [router, configured, zeroKeys, catalog, mode, subjectId]);
 
 	return (
 		<>
@@ -328,6 +334,7 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 				onSend={send}
 				mode={mode}
 				picks={picks}
+				subjectChip={subjectId ? <SubjectChip subjectId={subjectId} /> : undefined}
 				onOpenPicker={openPicker}
 				onClearPicks={() => applyPicks([])}
 				overlay={

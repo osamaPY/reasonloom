@@ -57,3 +57,11 @@ Existing Windows POSIX-mode skips do not verify ACL protection. Existing local d
 - Postponement choices are 1/3/7 days, anchored on the UTC day (idempotent), and end when a newer attempt arrives. UTC days are a known limit.
 - Untagged practice problems schedule under a per-session "topic" concept.
 - `next dev` rewrote the Next-managed heading in AGENTS.md during testing; that generated change was reverted.
+
+## Source-grounded sessions
+
+- Grounding is a one-time marker message at session creation (same mechanism as the graph-context pick), built from the subject's sources. Chosen over per-turn retrieval: no new agent tooling, no embedding dependency, and the record shows exactly what the model was given.
+- Labels, not hashes, are what the model cites (S1.P3); the marker's `details` hold the label -> (sourceId, passage ref) map, so refs stay exact and a made-up label cannot become a live link.
+- Bounded context (24,000 chars, 10 sources, 1,200 chars per passage) with explicit omission notes to both the model and the learner. Earliest passages win; no ranking yet.
+- Starting is from the Subjects page (`/chat/new?subject=`), not the home composer, to avoid touching that component's dense layout; a picker there is a follow-up.
+- Grounding is advisory. It is documented as such in the README rather than implied as enforcement.

@@ -50,6 +50,15 @@ describe("startDraftSession — the create-on-send contract", () => {
 		assert.deepEqual(calls[0]!.body, { title: "teach me orbital mechanics" });
 	});
 
+	it("a subject start rides the create: teach and practice both carry subjectId, and nothing else changes (fork)", async () => {
+		const teach = fakeFetch("c_s1");
+		await startDraftSession("explain it", teach.f, undefined, undefined, undefined, undefined, "sub-1");
+		assert.deepEqual(teach.calls[0]!.body, { title: "explain it", subjectId: "sub-1" });
+		const practice = fakeFetch("c_s2");
+		await startDraftSession("drill me", practice.f, "practice", [], undefined, undefined, "sub-1");
+		assert.deepEqual(practice.calls[0]!.body, { title: "drill me", kind: "practice", subjectId: "sub-1" });
+	});
+
 	it("no settings PUT on create — the server stamps the newborn (per-session models, owner 2026-09-28)", async () => {
 		const { f, calls } = fakeFetch("c_3");
 		await startDraftSession("hello", f);

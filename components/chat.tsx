@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import { createContext, Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useChatSession } from "@/components/session";
@@ -52,13 +53,14 @@ import { PlanMarginalia, planExists } from "@/components/plan-window";
 import { MermaidOverlay, SessionMermaidContext } from "@/components/session-overlay";
 import { AbortTurnDialog, type AbortMode } from "@/components/abort-turn-dialog";
 import { ArrowRightIcon, DumbbellIcon, WaypointsIcon } from "lucide-react";
-import type { PlanBlockData } from "@/src/core";
+import { linkCitations, type CitationTarget, type PlanBlockData, type SourceContextDetails } from "@/src/core";
 import { QuestionDock } from "@/components/question-dock";
 import { SessionFind } from "@/components/session-find";
 import { SessionMessageNavigation } from "@/components/session-navigation";
 import { PracticeDock } from "@/components/practice-dock";
 import { ThinkingCard, type PracticeThinkingData } from "@/components/practice-cards";
 import { GraphContextCard, type GraphContextData } from "@/components/graph-context-card";
+import { SourceContextCard } from "@/components/source-context-card";
 import { TopBar } from "@/components/top-bar";
 import type { ArtifactPartProps, JobRecord, Phase3, QuestionAnswerData, QuestionFormDraft, TurnUsage, SessionPricing } from "@/src/core";
 import type { LhViewMessage } from "@/src/core";
@@ -261,6 +263,32 @@ export function Chat({
 	const sessionFindScopeRef = useRef<HTMLDivElement | null>(null);
 	const scrollContextRef = useRef<StickToBottomContext | null>(null);
 	const sourceTextParts = useMemo(() => firstSourceTextParts(messages), [messages]);
+	// Fork: the label -> passage map of the session's source context (if any),
+	// so a cited [S1.P2] in the teacher's text becomes a link to that passage.
+	const citations = useMemo(() => {
+		const out: Record<string, CitationTarget> = {};
+		for (const m of messages) {
+			for (const p of m.parts) {
+				if (p.type === "data-source-context") Object.assign(out, (p.data as SourceContextDetails | undefined)?.citations ?? {});
+			}
+		}
+		return out;
+	}, [messages]);
+	// Streamdown renders a link as a safety-gated button (it would open a
+	// confirm modal / new tab). A cited label is internal, so a capture-phase
+	// click handler on the text wrapper routes it to the Sources page instead.
+	const citationRouter = useRouter();
+	const onCitationClick = useCallback(
+		(e: React.MouseEvent) => {
+			const link = (e.target as HTMLElement).closest('[data-streamdown="link"]');
+			const target = link ? citations[link.textContent?.trim() ?? ""] : undefined;
+			if (!target) return;
+			e.preventDefault();
+			e.stopPropagation();
+			citationRouter.push(`/sources?source=${encodeURIComponent(target.sourceId)}&ref=${encodeURIComponent(target.ref)}`);
+		},
+		[citations, citationRouter],
+	);
 
 	// The reattach settled terminal → the sync-and-continue seam (below).
 	setReattachSettled(() => reattachSettledRef.current());
@@ -1432,6 +1460,8 @@ export function Chat({
 								<Fragment key={m.id || `m-${mi}`}>
 									{m.parts.map((part, pi) => {
 										switch (part.type) {
+											case "data-source-context":
+												return <SourceContextCard key={pi} data={part.data as SourceContextDetails} />;
 											case "data-graph-context":
 												return <GraphContextCard key={pi} data={part.data as GraphContextData} />;
 											case "data-compaction":
@@ -1551,8 +1581,8 @@ export function Chat({
 														const sourceId = textPartMessageId(part.id);
 														const anchor = sourceId && sourceTextParts.get(sourceId) === part.id ? messageAnchorId(sourceId) : undefined;
 														return (
-															<div key={part.id || pi} id={anchor} data-source-message-id={sourceId ?? undefined} className="lh-source-passage">
-																<MessageResponse>{part.text}</MessageResponse>
+															<div key={part.id || pi} id={anchor} data-source-message-id={sourceId ?? undefined} className="lh-source-passage" onClickCapture={onCitationClick}>
+																<MessageResponse>{linkCitations(part.text ?? "", citations)}</MessageResponse>
 															</div>
 														);
 													}

@@ -388,6 +388,16 @@ function projectMarker(marker: LhMarkerMessage, out: LhViewMessage[]): void {
 			});
 			return;
 		}
+		case "source-context": {
+			// Fork: the subject's source context — a collapsible card above the
+			// first user message, like the graph context; never a text bubble.
+			out.push({
+				id: marker.id,
+				role: "user",
+				parts: [{ type: "data-source-context", id: `sc_${marker.id}`, data: marker.details }],
+			});
+			return;
+		}
 		case "probe-handoff": {
 			out.push({
 				id: marker.id,

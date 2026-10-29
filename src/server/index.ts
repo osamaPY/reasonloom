@@ -14,6 +14,7 @@ export * from "./jobs.ts";
 export * from "./stores.ts";
 export * from "./subjects.ts";
 export * from "./sources.ts";
+export * from "./source-context.ts";
 export * from "./reviews.ts";
 export * from "./sample.ts";
 export { readRenderSettings, writeRenderSettings } from "../store/render-settings.ts";

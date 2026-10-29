@@ -135,6 +135,17 @@ export function SubjectsView() {
 					))}
 				</p>
 			)}
+			{!s.archived && (
+				<div className="mt-3 flex flex-wrap items-center gap-2 font-ui text-xs">
+					<Link data-testid="start-teaching" href={`/chat/new?subject=${encodeURIComponent(s.id)}`} className="rounded-md border px-2.5 py-1 hover:bg-accent">
+						Start a lesson
+					</Link>
+					<Link data-testid="start-practice" href={`/chat/new?mode=practice&subject=${encodeURIComponent(s.id)}`} className="rounded-md border px-2.5 py-1 hover:bg-accent">
+						Start practice
+					</Link>
+					<span className="text-muted-foreground">{sources.some((src) => src.subjectId === s.id) ? "Grounded in this subject's sources." : "Add sources to ground sessions in your material."}</span>
+				</div>
+			)}
 			<ul className="mt-2 divide-y">
 				{(data?.sessions[s.id] ?? []).map((id) => sessionRow(id, s))}
 				{(data?.sessions[s.id] ?? []).length === 0 && <li className="py-1 font-ui text-xs text-muted-foreground/70">No sessions yet.</li>}

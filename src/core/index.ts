@@ -53,6 +53,7 @@ export * from "./answer-presentation.ts";
 export * from "./prices.ts";
 export * from "./subjects.ts";
 export * from "./sources.ts";
+export * from "./source-context.ts";
 export * from "./reviews.ts";
 export * from "./context-usage.ts";
 export type { ChatGPTStatus, ChatGPTControlBridge } from "./contracts/chatgpt.ts";

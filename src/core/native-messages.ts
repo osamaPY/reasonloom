@@ -68,6 +68,7 @@ export interface LhMarkerMessage {
 	role: "custom";
 	customType:
 		| "graph-context"
+		| "source-context"
 		| "probe-handoff"
 		| "subagent-steer"
 		| "subagent-abort"
@@ -302,6 +303,23 @@ export function newGraphContextMessage(picks: readonly GraphContextPick[], chain
 		content: lines.join("\n"),
 		display: true,
 		details: { propositions: picks, chains },
+		timestamp: Date.now(),
+	};
+}
+
+/** The session's source context (fork): a SEPARATE custom message built from the
+*  subject's source library (core/source-context.ts). `content` is the model-facing
+*  text (flattened to a user message like every marker); `details` feeds the
+*  transcript card AND carries the label -> passage map that turns cited labels
+*  into links. */
+export function newSourceContextMessage(content: string, details: unknown): LhMarkerMessage {
+	return {
+		id: newMessageId(),
+		role: "custom",
+		customType: "source-context",
+		content,
+		display: true,
+		details,
 		timestamp: Date.now(),
 	};
 }
@@ -819,7 +837,7 @@ export function nativeInputCause(message: AgentMessage, history: readonly AgentM
 	if (message.role === "custom") {
 		if (["probe-handoff", "subagent-steer", "subagent-abort"].includes(message.customType)) return "automatic";
 		if (["practice-thinking", "practice-next"].includes(message.customType)) return "learner";
-		return ["graph-context", "plan-block", "problem-dismissed", "compaction"].includes(message.customType) ? "neutral" : "unrecognizable";
+		return ["graph-context", "source-context", "plan-block", "problem-dismissed", "compaction"].includes(message.customType) ? "neutral" : "unrecognizable";
 	}
 	if (message.role === "toolResult") {
 		if (!(QUESTION_TOOLS as readonly string[]).includes(message.toolName) || message.isError || message.details == null || (message.details as { dismissed?: boolean }).dismissed) return "neutral";
