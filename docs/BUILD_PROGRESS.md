@@ -12,7 +12,7 @@ User asked this chat to start the batches and continuously record progress for C
 
 - HEAD: `dc4c398` (upstream 0.4.0 preparation), branch main.
 - Origin: `https://github.com/osamaPY/learnharness-fork.git`; upstream: Amos Blomqvist's original repository.
-- Created external backup: `C:/Users/oussa/Desktop/learnharness-p00-20261029-184732`.
+- Created external backup: `<local-path>/learnharness-p00-20261029-184732`.
 - Backup includes copies of all 25 modified/untracked files present at turn start, SHA256 manifest, binary tracked diff, and status snapshot. Ignored learning data and credentials were not copied or modified.
 - Existing changes include Windows portability tests, local dictation changes, desktop launch behavior, README attribution, browser name, and the cross-platform test runner. Do not reset these.
 

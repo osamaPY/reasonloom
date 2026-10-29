@@ -10,7 +10,7 @@ I want you to help me develop a substantial, polished fork of LearnHarness. Read
 
 ## Project and intent
 
-- Local workspace: `C:\Users\oussa\Desktop\learnharness`
+- Local workspace: `<local-path>/learnharness`
 - Original project: https://github.com/amosblomqvist/learnharness
 - Full product roadmap: `docs/FORK_ROADMAP.md`
 - Repository instructions: `AGENTS.md`
