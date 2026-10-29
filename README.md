@@ -81,6 +81,11 @@ The model is handed that subject's passages, told to prefer them, to say so when
 
 ![Home with the subject picker](docs/assets/reasonloom/home.png)
 
+### Math looks like math
+Anywhere a formula shows up, it's typeset with LaTeX (KaTeX): in the model's replies, session titles in the sidebar, your source passages, the "Sources" card, and Review. Write `$x^2$` for inline and `$$...$$` on its own line for a displayed equation (`\(...\)` and `\[...\]` work too). Prices like "$5 and $6" are left as text, and a bad formula shows its source instead of breaking the page.
+
+![Inline math, matrices, aligned equations and display math](docs/assets/reasonloom/latex.png)
+
 ### 5. Come back for review
 Finished practice problems show up on **Review**. Each concept returns after 1, 3, 7, 14, 30, then 60 days, and the page tells you why it's due ("last attempt solved with hints, 5 days overdue"). Use **Postpone** for 1, 3 or 7 days, or **Grading is wrong** if the model marked you incorrectly (that attempt then stops counting).
 

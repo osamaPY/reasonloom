@@ -17,6 +17,7 @@
  *    exists in the learner's library, not that it supports the claim.
  */
 
+import { mathSafePreview } from "./math-text.ts";
 import { splitPassages, type SourceMeta } from "./sources.ts";
 
 export const CONTEXT_CHAR_BUDGET = 24_000;
@@ -46,7 +47,10 @@ export interface SourceContextDetails {
 	citations: Record<string, CitationTarget>;
 }
 
-const preview = (text: string) => (text.length > 140 ? `${text.slice(0, 140).trimEnd()}…` : text);
+const preview = (text: string) => {
+	const p = mathSafePreview(text.replace(/\s*\n\s*/g, " "), 140);
+	return p.truncated ? `${p.text}…` : p.text;
+};
 
 export function buildSourceContext(
 	subject: { id: string; name: string },

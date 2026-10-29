@@ -26,13 +26,15 @@ export const SAMPLE_SOURCE_TEXT = `# Eigenvalues (sample source)
 
 This file is sample data written for the demo workspace. It is not a textbook and may be simplified.
 
-An eigenvector of a square matrix A is a nonzero vector v such that Av = λv for some number λ. The number λ is the eigenvalue belonging to v.
+An eigenvector of a square matrix $A$ is a nonzero vector $\\mathbf{v}$ such that $A\\mathbf{v} = \\lambda\\mathbf{v}$ for some number $\\lambda$. The number $\\lambda$ is the eigenvalue belonging to $\\mathbf{v}$.
 
-To find eigenvalues, solve det(A − λI) = 0. This is the characteristic equation. For a 2×2 matrix it is a quadratic in λ.
+To find eigenvalues, solve the characteristic equation:
+$$\\det(A - \\lambda I) = 0$$
+For a $2 \\times 2$ matrix this is a quadratic in $\\lambda$.
 
-For a diagonal matrix the eigenvalues are the entries on the diagonal. For example, the matrix with 2 and 3 on the diagonal has eigenvalues 2 and 3.
+For a diagonal matrix the eigenvalues are the entries on the diagonal. For example, $\\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix}$ has eigenvalues $2$ and $3$.
 
-Common mistake: forgetting that an eigenvector must be nonzero. The zero vector satisfies Av = λv for every λ, so it carries no information.
+Common mistake: forgetting that an eigenvector must be nonzero. The zero vector satisfies $A\\mathbf{v} = \\lambda\\mathbf{v}$ for every $\\lambda$, so it carries no information.
 `;
 
 const STAMPS = {
@@ -74,22 +76,22 @@ export function sampleMessages(now: number): LhMessage[] {
 		...pair(t, {
 			id: "sample_p1",
 			name: "problem",
-			args: { statement: "(Sample data) Find the eigenvalues of the matrix with 2 and 3 on its diagonal and zeros elsewhere.", mode: "recall", modelSolution: "The eigenvalues are 2 and 3." },
+			args: { statement: "(Sample data) Find the eigenvalues of $\\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix}$.", mode: "recall", modelSolution: "The eigenvalues are $2$ and $3$." },
 		}),
 		...pair(t + 60_000, {
 			id: "sample_c1",
 			name: "conclude",
-			args: { outcome: "solvedWithHints", verdict: "(Sample data) Needed a nudge that diagonal entries are the eigenvalues.", rung: "R2", missClass: "cue", retest: true },
+			args: { outcome: "solvedWithHints", verdict: "(Sample data) Needed a nudge that the diagonal entries are the eigenvalues $\\lambda_1 = 2$, $\\lambda_2 = 3$.", rung: "R2", missClass: "cue", retest: true },
 		}),
 		...pair(t + 120_000, {
 			id: "sample_p2",
 			name: "problem",
-			args: { statement: "(Sample data) Why must an eigenvector be nonzero?", mode: "discrimination", modelSolution: "The zero vector satisfies Av = λv for every λ." },
+			args: { statement: "(Sample data) Why must an eigenvector $\\mathbf{v}$ be nonzero?", mode: "discrimination", modelSolution: "The zero vector satisfies $A\\mathbf{0} = \\lambda\\mathbf{0}$ for every $\\lambda$." },
 		}),
 		...pair(t + 180_000, {
 			id: "sample_c2",
 			name: "conclude",
-			args: { outcome: "solved", verdict: "(Sample data) Correct: the zero vector fits every λ, so it says nothing.", rung: null, missClass: null, retest: false },
+			args: { outcome: "solved", verdict: "(Sample data) Correct: $\\mathbf{0}$ fits every $\\lambda$, so it says nothing.", rung: null, missClass: null, retest: false },
 		}),
 	];
 }

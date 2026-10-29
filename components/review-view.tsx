@@ -8,6 +8,8 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { MessageResponse } from "@/components/ai-elements/message";
+import { MathText } from "@/components/math-text";
 import type { ReviewOverview } from "@/src/core";
 
 const OUTCOME_LABEL: Record<string, string> = {
@@ -74,7 +76,7 @@ export function ReviewView() {
 			<ul className="flex flex-col gap-2">
 				{data?.due.map((r) => (
 					<li key={r.concept} data-testid="review-due" className="rounded-xl border bg-card/85 p-3">
-						<p className="font-ui text-sm">{r.label}</p>
+						<p className="font-ui text-sm"><MathText text={r.label} /></p>
 						<p className="pb-2 font-ui text-xs text-muted-foreground">{r.reason}</p>
 						<div className="flex flex-wrap items-center gap-2 font-ui text-xs">
 							<Link href={`/chat/${r.lastChatId}`} className="rounded-md border px-2 py-1 hover:bg-accent">
@@ -97,7 +99,7 @@ export function ReviewView() {
 					<ul className="flex flex-col gap-1">
 						{data.upcoming.map((r) => (
 							<li key={r.concept} data-testid="review-upcoming" className="font-ui text-xs">
-								<span className="text-foreground">{r.label}</span> <span className="text-muted-foreground">— {r.postponed ? "postponed to" : "due"} {day(r.due)}</span>
+								<span className="text-foreground"><MathText text={r.label} /></span> <span className="text-muted-foreground">— {r.postponed ? "postponed to" : "due"} {day(r.due)}</span>
 							</li>
 						))}
 					</ul>
@@ -122,14 +124,14 @@ export function ReviewView() {
 									{a.disputed && <span className="text-destructive"> · grading disputed, not counted</span>}
 									{a.outcome === "dismissed" && <span className="text-muted-foreground"> · not counted</span>}
 								</p>
-								{a.statement && <p className="line-clamp-2 font-sans text-sm">{a.statement}</p>}
-								{a.verdict && <p className="font-ui text-xs text-muted-foreground">{a.verdict}</p>}
+								{a.statement && <MessageResponse className="text-sm">{a.statement}</MessageResponse>}
+								{a.verdict && <MessageResponse className="text-xs text-muted-foreground">{a.verdict}</MessageResponse>}
 								<p className="font-ui text-xs text-muted-foreground">
 									<Link href={`/chat/${a.chatId}`} className="hover:underline">
-										{a.chatTitle}
+										<MathText text={a.chatTitle} />
 									</Link>
 									{" · "}
-									{a.concepts.map((c) => c.label).join(", ")}
+									{a.concepts.map((c, i) => (<span key={c.concept}>{i > 0 && ", "}<MathText text={c.label} /></span>))}
 								</p>
 							</div>
 							{a.outcome !== "dismissed" && (

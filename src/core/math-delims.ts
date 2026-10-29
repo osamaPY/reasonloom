@@ -41,7 +41,16 @@ export function transformMathDelimiters(markdown: string): string {
 	return readContentSpans(markdown).map(span => {
 		const start = offset; offset += span.raw.length;
 		if (span.kind !== "math") return span.raw;
-		if (span.open === "$") return "$" + replaceEscapedDollars(span.body) + span.close;
+		if (span.open === "$") {
+			// CURRENCY (fork): "costs $5 and then $6" pairs two prices as one
+			// span. A pair that reads like prose between prices (padded by
+			// whitespace on an inner edge AND touching a digit at the start of
+			// the body or right after the closer) is literal dollars, never math.
+			const next = markdown[start + span.raw.length] ?? "";
+			const padded = /^\s|\s$/.test(span.body);
+			if (padded && (/^\d/.test(span.body) || /\d/.test(next))) return "\\$" + span.body + "\\$";
+			return "$" + replaceEscapedDollars(span.body) + span.close;
+		}
 		if (span.open !== "\\(" && span.open !== "\\[") return span.raw;
 		const body = span.body.trim();
 		if (!body) return span.raw;

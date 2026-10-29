@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MathText } from "@/components/math-text";
 import type { SourceContextDetails } from "@/src/core";
 
 /**
@@ -47,7 +48,7 @@ export function SourceContextCard({ data }: { data: SourceContextDetails }) {
 										<Link href={`/sources?source=${encodeURIComponent(s.id)}&ref=${encodeURIComponent(p.ref)}`} className="font-mono text-[11px] underline">
 											{p.label}
 										</Link>{" "}
-										{p.preview}
+										<MathText text={p.preview} />
 									</li>
 								))}
 							</ul>

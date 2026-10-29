@@ -53,9 +53,9 @@ describe("math delimiter transform (pure unit)", () => {
 		);
 	});
 
-	it("leaves currency untouched", () => {
+	it("keeps currency literal (fork: a price pair is never read as one math span)", () => {
 		const md = "It costs $5 and $10 more. $$big$$ sums too.";
-		assert.equal(transformMathDelimiters(md), md);
+		assert.equal(transformMathDelimiters(md), "It costs \\$5 and \\$10 more. $$big$$ sums too.");
 	});
 
 	it("leaves escaped delimiters untouched (\\\\( is a literal backslash)", () => {
@@ -285,9 +285,9 @@ describe("escaped dollars inside math — transform units", () => {
 		assert.equal(transformMathDelimiters(md), md);
 	});
 
-	it("leaves prose escaped dollars and bare currency untouched", () => {
+	it("keeps prose escaped dollars and currency literal (fork: price pairs are escaped, not math)", () => {
 		const md = "It costs \\$5 flat, then $5 and $10 more.";
-		assert.equal(transformMathDelimiters(md), md);
+		assert.equal(transformMathDelimiters(md), "It costs \\$5 flat, then \\$5 and \\$10 more.");
 	});
 
 	it("leaves display spans untouched — a lone $ can't close $$, \\$ already survives", () => {

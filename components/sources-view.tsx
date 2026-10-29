@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LinkIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { MessageResponse } from "@/components/ai-elements/message";
 import { findPassages, SOURCE_EXTENSIONS, type Passage, type PassageResolution, type SourceMeta, type Subject } from "@/src/core";
 
 interface UploadResult {
@@ -239,7 +240,7 @@ export function SourcesView() {
 								data-target={target === p.index ? "true" : undefined}
 								className={`group relative rounded-md border px-3 py-2 ${target === p.index ? "border-ring bg-accent" : hits.has(p.index) ? "border-ring/50" : "border-transparent"}`}
 							>
-								<p className="whitespace-pre-wrap break-words font-sans text-sm">{p.text}</p>
+								<MessageResponse className="break-words text-sm">{p.text}</MessageResponse>
 								<button
 									type="button"
 									aria-label={`Copy link to passage ${p.index + 1}`}

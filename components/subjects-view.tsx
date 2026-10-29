@@ -9,6 +9,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ArchiveIcon, ArchiveRestoreIcon } from "lucide-react";
+import { MathText } from "@/components/math-text";
 import type { ChatSummary, SourceMeta, Subject } from "@/src/core";
 
 interface SubjectsPayload {
@@ -70,7 +71,7 @@ export function SubjectsView() {
 	const sessionRow = (id: string, subject: Subject | null) => (
 		<li key={id} className="flex items-center gap-2 py-1">
 			<Link href={`/chat/${id}`} className="min-w-0 flex-1 truncate text-sm hover:underline">
-				{title(id)}
+				<MathText text={title(id)} />
 			</Link>
 			<select
 				aria-label={`Subject for ${title(id)}`}
