@@ -14,7 +14,7 @@ import { ChainTableOverlay } from "@/components/chain-table.tsx";
 import { ComposerActions, NodePickerControl } from "@/components/composer-actions";
 import { OPENING_PROMPT_FAILURE } from "@/components/opening-prompt";
 import { SessionStarter } from "@/components/start-session";
-import { SubjectChip } from "@/components/subject-chip";
+import { SubjectPicker } from "@/components/subject-picker";
 import type { ChatSettings, GraphSnapshot } from "@/src/core";
 
 /** The draft's pick set (owner round 10): the SAME shape the home pick
@@ -82,7 +82,7 @@ export function DraftShell({
 	onOpenPicker,
 	onClearPicks,
 	overlay,
-	subjectChip,
+	subjectPicker,
 }: {
 	busy: boolean;
 	text: string;
@@ -111,7 +111,7 @@ export function DraftShell({
 	 *  Passed as a node so the pick state stays in NewSession. */
 	overlay?: ReactNode;
 	/** Fork: which subject (and how many sources) this session will start from. */
-	subjectChip?: ReactNode;
+	subjectPicker?: ReactNode;
 }) {
 	// Voice dictation (STT wave, 2026-09-17): finals append at the end of the
 	// draft text (via the parent's onChange — the truth lives there); the
@@ -188,12 +188,12 @@ export function DraftShell({
 						<div className="bg-background pb-4">
 							<div className={DOCK}>
 								<ComposerActions
+									subject={subjectPicker}
 									picker={(picks.length > 0 || mode === "practice") && (
 										<NodePickerControl count={picks.length} onOpen={onOpenPicker} onClear={onClearPicks} />
 									)}
 									setup={setupCta}
 								/>
-								{subjectChip}
 								{startError && <p role="alert" className="pointer-events-auto mb-2 text-sm text-destructive">{OPENING_PROMPT_FAILURE}</p>}
 								<div className="pointer-events-auto overflow-hidden rounded-2xl border bg-card shadow-lg">
 									<Composer
@@ -235,8 +235,10 @@ export function DraftShell({
 	);
 }
 
-export function NewSession({ initialConfigured, mode = "teach", subjectId }: { initialConfigured: boolean; mode?: "teach" | "practice"; subjectId?: string }) {
+export function NewSession({ initialConfigured, mode = "teach", subjectId: initialSubjectId }: { initialConfigured: boolean; mode?: "teach" | "practice"; subjectId?: string }) {
 	const router = useRouter();
+	// Fork: the subject this draft starts from — seeded by /chat/new?subject=, changeable here.
+	const [subjectId, setSubjectId] = useState<string | null>(initialSubjectId ?? null);
 	const [text, setText] = useState("");
 	/* The draft MIRROR ("nothing gets lost" round, 2026-10-01): the shell's
 	 * finish-first send calls THIS send after the dictation flush — which
@@ -312,7 +314,7 @@ export function NewSession({ initialConfigured, mode = "teach", subjectId }: { i
 		setBusy(true);
 		setStartError(false);
 		void startDraftSession(draft, fetch, mode === "practice" ? "practice" : undefined, mode === "practice" ? picksRef.current : undefined,
-			starterRef.current, JSON.stringify(catalog?.slots.strong), subjectId)
+			starterRef.current, JSON.stringify(catalog?.slots.strong), subjectId ?? undefined)
 			.then((target) => {
 				if (target) router.push(target);
 				else { startingRef.current = false; setBusy(false); }
@@ -334,7 +336,7 @@ export function NewSession({ initialConfigured, mode = "teach", subjectId }: { i
 				onSend={send}
 				mode={mode}
 				picks={picks}
-				subjectChip={subjectId ? <SubjectChip subjectId={subjectId} /> : undefined}
+				subjectPicker={<SubjectPicker value={subjectId} onChange={setSubjectId} />}
 				onOpenPicker={openPicker}
 				onClearPicks={() => applyPicks([])}
 				overlay={

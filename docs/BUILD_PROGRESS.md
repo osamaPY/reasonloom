@@ -81,3 +81,9 @@ Tests: `source-context.test.ts` (12), `source-context-marker.test.ts` (2, real l
 NOT verified: any live model actually citing labels or staying inside the material (the instruction is untested against a real model); starting a session by clicking Send in the UI (needs a configured provider; the create body is unit-tested and the API verified with curl); behaviour after context compaction (the marker may be summarised away; the card and citation map stay in the record); sessions started from the home composer have no subject picker.
 
 Next highest-value: run a real-provider session from a subject and check citation fidelity; add a subject picker to the home composer; let Review open a fresh practice session on a due concept inside its subject.
+
+## Checkpoint 4 (subject picker)
+
+Added `components/subject-picker.tsx` (select of active subjects with source counts, hidden until a subject exists, clears a stale/archived link with a visible note) in the home composer and the new-session draft (replaces the URL-only chip; `/chat/new?subject=` still seeds it). `ComposerActions` gained a `subject` slot and hides its row when empty. Home now sends `subjectId` on create. Tests: `subject-picker.test.tsx` (6). Full suite 3035 tests, 3029 pass, 0 fail, 6 skipped; typecheck, lint, production build clean. Browser (production build, isolated data): picker absent with no active subject; present with options "No subject" / "Sample: Eigenvalues · 1 source" after loading the sample; archived subject in the draft URL shows the stale note.
+
+NOT verified: pressing Send from the home composer with a subject chosen (needs a configured provider; the draft path is unit-tested, the home path shares the same starter but its create body is not asserted by a test); live-model citation fidelity (still open from Checkpoint 3).

@@ -5,14 +5,15 @@ import { DumbbellIcon } from "lucide-react";
 
 /** Home and the draft share one wrapping action row. Picker controls lead;
  * setup is centered only when it is the sole action. */
-export function ComposerActions({ picker, setup }: { picker?: ReactNode; setup?: ReactNode }) {
-	if (!picker && !setup) return null;
+export function ComposerActions({ picker, setup, subject }: { picker?: ReactNode; setup?: ReactNode; subject?: ReactNode }) {
+	if (!picker && !setup && !subject) return null;
 	return (
 		<div
 			data-testid="composer-actions"
-			className={`pointer-events-auto mb-2 flex flex-wrap items-center gap-2 ${picker ? "justify-start" : "justify-center"}`}
+			className={`pointer-events-auto mb-2 flex empty:hidden flex-wrap items-center gap-2 ${picker || subject ? "justify-start" : "justify-center"}`}
 		>
 			{picker}
+			{subject}
 			{setup}
 		</div>
 	);
