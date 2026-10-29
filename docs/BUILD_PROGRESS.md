@@ -138,3 +138,7 @@ One item per README limit:
 - **Name**: preliminary search only (no product hits; npm/PyPI free; reasonloom.com/.ai have DNS records). Not a trademark clearance.
 
 Live checks (DeepSeek V4.1 Flash through the UI, isolated data dir): a real Wikipedia article imported (173 formulas, 0 KaTeX errors, no images), a generated 3-page PDF imported (page markers), a 2-source subject over budget ranked, an existing session grounded from the Subjects page, a practice problem built from the imported page with valid citations. The key was passed only as an environment variable and the temp data was deleted.
+
+## Checkpoint 8 (macOS without Apple secrets)
+
+The first tag run (v0.4.0) failed only at "Validate macOS release secrets": the repository has no Apple signing secrets. The workflow now has a "Decide macOS signing" step: all five secrets present -> the existing signed + notarized path (`forceCodeSigning`); anything missing (including a partial set) -> an ad-hoc signed, NOT notarized build (`-c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false`, no keychain search) with a loud warning. Ad-hoc, not unsigned: an arm64 binary must carry at least an ad-hoc signature to launch. Consequences, stated in the README: Gatekeeper warns (right-click > Open) and Squirrel.Mac auto-update will not work for that build. The rest of the pipeline (packaged-runtime smokes, upload, the 11-asset verify job) is unchanged. Release tests (verify-release, desktop-platform) pass; the YAML parses; the real proof is the CI run on the moved tag.

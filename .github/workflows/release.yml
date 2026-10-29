@@ -133,7 +133,15 @@ jobs:
       - run: node scripts/smoke-provider-runtime.mjs
       - run: node scripts/build-server.mjs
       - run: node scripts/smoke-server.mjs --electron
-      - name: Validate macOS release secrets
+      # Fork policy: a macOS release is signed and notarized when ALL five Apple
+      # secrets exist. When none or only some exist it is NOT failed: it is built
+      # ad-hoc signed (an arm64 app must carry at least an ad-hoc signature to
+      # launch at all) and not notarized, and the step says so loudly. Such a build
+      # opens only via right-click > Open (Gatekeeper), and macOS auto-update will
+      # not work for it (Squirrel.Mac needs a real signature). A partial set is
+      # treated as unsigned, never as a half-configured signed build.
+      - name: Decide macOS signing
+        id: mac_sign
         if: github.event_name == 'push' && runner.os == 'macOS'
         env:
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
@@ -142,14 +150,19 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          missing=()
           for name in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
-            if [[ -z "${!name}" ]]; then
-              echo "::error::Missing signing/notarization secret: $name"
-              exit 1
-            fi
+            if [[ -z "${!name}" ]]; then missing+=("$name"); fi
           done
+          if [[ ${#missing[@]} -eq 0 ]]; then
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+            echo "macOS: all signing/notarization secrets present -> signed and notarized build."
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::macOS signing secrets missing (${missing[*]}). Building an AD-HOC SIGNED, NOT NOTARIZED app: Gatekeeper will warn and auto-update will not work. Add the secrets to ship a signed build."
+          fi
       - name: Signed and notarized macOS release → draft
-        if: github.event_name == 'push' && runner.os == 'macOS'
+        if: github.event_name == 'push' && runner.os == 'macOS' && steps.mac_sign.outputs.signed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
@@ -158,6 +171,14 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npx electron-builder ${{ matrix.builder_args }} --publish always -c.forceCodeSigning=true
+      - name: Ad-hoc signed macOS release (NOT notarized) → draft
+        if: github.event_name == 'push' && runner.os == 'macOS' && steps.mac_sign.outputs.signed != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No keychain identity search; sign ad-hoc ("-"). Hardened runtime would
+          # reject Electron's own pre-signed frameworks under an ad-hoc signature.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder ${{ matrix.builder_args }} --publish always -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false
       - name: Windows/Linux release → draft
         if: github.event_name == 'push' && runner.os != 'macOS'
         env:
