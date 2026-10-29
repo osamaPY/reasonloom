@@ -150,9 +150,10 @@ export function SourcesView() {
 	const subjectName = (id: string | null) => subjects.find((s) => s.id === id)?.name;
 
 	return (
-		<div className="mx-auto h-full w-full max-w-3xl overflow-y-auto px-4 pb-16 pt-16">
-			<h1 className="pb-1 font-ui text-lg">Sources</h1>
-			<p className="pb-4 font-ui text-xs text-muted-foreground">
+		<div className="reasonloom-workspace mx-auto h-full w-full max-w-3xl overflow-y-auto px-4 pb-16 pt-16">
+			<p className="reasonloom-eyebrow">A library for your thinking</p>
+			<h1 className="reasonloom-title">Sources</h1>
+			<p className="pb-6 font-prose text-base leading-relaxed text-muted-foreground">
 				Keep your notes here as plain text ({SOURCE_EXTENSIONS.join(", ")}, up to 1 MiB each). Adding a file stores a copy; nothing is sent to a model.
 			</p>
 

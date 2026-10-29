@@ -12,10 +12,13 @@ if (process.versions.electron && process.env.LH_IDENTITY_SMOKE_ROOT) {
 	try {
 		const root = process.env.LH_IDENTITY_SMOKE_ROOT;
 		app.setPath("appData", root);
+		app.setName("LearnHarness Fork");
+		const forkProfile = app.getPath("userData");
 		app.setName(product.productName);
+		app.setPath("userData", forkProfile);
 		if (process.argv.includes("--dev")) app.setPath("userData", `${app.getPath("userData")}-dev`);
 		const expected = path.join(root, `LearnHarness Fork${process.argv.includes("--dev") ? "-dev" : ""}`);
-		assert.equal(app.getName(), "LearnHarness Fork");
+		assert.equal(app.getName(), "Reasonloom");
 		assert.equal(app.getPath("userData"), expected);
 		console.log(`PASS real Electron ${process.argv.includes("--dev") ? "dev" : "default"} profile isolation`);
 		app.exit(0);

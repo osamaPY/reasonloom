@@ -31,6 +31,25 @@ function withDir(fn: (dir: string) => void) {
 }
 
 describe("source library store", () => {
+	it("preserves the old text and metadata when an update cannot commit its index", () => {
+		withDir((dir) => {
+			const out = JSON.parse(run(dir, `
+				const fs = await import("node:fs");
+				const a = m.ingestSource({ name: "notes.md", bytes: 3, text: "old" });
+				const before = m.readSourceIndex();
+				const rename = fs.default.renameSync;
+				fs.default.renameSync = (from, to) => {
+					if (String(to).endsWith("index.json")) throw new Error("simulated index write failure");
+					return rename(from, to);
+				};
+				const result = m.ingestSource({ name: "notes.md", bytes: 3, text: "new" });
+				fs.default.renameSync = rename;
+				console.log(JSON.stringify({ result, before, after: m.readSourceIndex(), text: m.readSourceText(a.id) }));`));
+			assert.equal(out.result.reason, "write_failed");
+			assert.deepEqual(out.after, out.before);
+			assert.equal(out.text, "old");
+		});
+	});
 	it("adds, reports duplicates and updates, and persists across processes", () => {
 		withDir((dir) => {
 			const files = {

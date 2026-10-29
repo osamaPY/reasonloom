@@ -1,5 +1,19 @@
 # Build decisions
 
+## Reasonloom rebrand (owner-selected, 2026-10-29)
+
+- Public name: Reasonloom. Package/executable: reasonloom. Installer prefix: Reasonloom. GitHub repository remains osamaPY/learnharness-fork; no remote rename or publication implied.
+- Retain the existing LearnHarness Fork desktop profile (and -dev profile) across branding changes. Set that storage path explicitly before restoring the Reasonloom display name, preventing saved fork data from appearing lost. Original upstream LearnHarness data remains separate.
+- Provider user-agent derives from package identity rather than a hardcoded upstream name.
+- Review Claude's P01-P06 as implementation, not proof of source-grounded learning: sources still need integration into lessons. Document real fixes and limits rather than certifying all roadmap items done.
+
+### Review of the previous session's work (this session)
+
+- Reviewed Codex's uncommitted rebrand on top of `3ab7920`. Kept: rename to Reasonloom (package, executable, app ID, installers, provider identity), retained `LearnHarness Fork` desktop profile path so saved data is not orphaned, the sample-workspace data-loss fix (the sample no longer routes through normal ingestion, which could update or re-assign a learner's same-named or identical source), source-update rollback on an index write failure, and Review page HTTP-error handling. All verified with regression tests and a rerun of the identity/release/desktop/provider tests (146 pass).
+- Changed: (1) the global `:focus-visible` outline that replaced upstream's deliberate "no-ring law" was scoped back to Reasonloom's own pages and sidebar navigation, so the teaching surfaces keep upstream behaviour (arrow keys in the quiz no longer light up a previously clicked element) while the new pages gain a visible keyboard ring; (2) removed the duplicate wordmark Codex added to the home header (the sidebar carries the wordmark; the header one overlapped the sidebar toggle); (3) subject goal textarea auto-grows (`field-sizing: content`) instead of clipping long goals.
+- Brand additions: original weave mark (warp threads in paper, weft in teal) used for the sidebar mark, browser favicon (`app/icon.svg`), and regenerated Windows/Linux app icons (`build/icon-flat.svg` -> `build/icon.ico`, `build/icon.png`); page metadata description now states the product promise.
+- Not done: the macOS icon (`build/icon.icns`, `build/icon.icon`) still carries upstream artwork and needs Icon Composer/actool; installer images (`build/background*.png`, DMG) not redrawn; the name is not trademark/domain cleared; no light theme (the app is dark-only by upstream design).
+
 ## Execution scope
 
 The user asked to start the documented batches and keep a simultaneous handoff log. Proceed with the described bounded patches, preserving local work and recording reversible implementation choices. The earlier request was for automation; avoid repeating already settled questions. Public final brand selection remains open.

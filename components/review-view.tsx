@@ -27,7 +27,9 @@ export function ReviewView() {
 	const load = useCallback(async () => {
 		try {
 			const res = await fetch("/api/reviews");
+			if (!res.ok) throw new Error("Review request failed");
 			setData((await res.json()) as ReviewOverview);
+			setError(null);
 		} catch {
 			setError("Could not load your review queue.");
 		}
@@ -38,15 +40,23 @@ export function ReviewView() {
 
 	const post = async (url: string, body: unknown) => {
 		setError(null);
-		const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-		if (!res.ok) setError("That did not work — the item may no longer exist.");
-		await load();
+		try {
+			const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+			if (!res.ok) {
+				setError("That did not work — the item may no longer exist.");
+				return;
+			}
+			await load();
+		} catch {
+			setError("Could not save your change. Please try again.");
+		}
 	};
 
 	return (
-		<div className="mx-auto h-full w-full max-w-3xl overflow-y-auto px-4 pb-16 pt-16">
-			<h1 className="pb-1 font-ui text-lg">Review</h1>
-			<p className="pb-4 font-ui text-xs text-muted-foreground">
+		<div className="reasonloom-workspace mx-auto h-full w-full max-w-3xl overflow-y-auto px-4 pb-16 pt-16">
+			<p className="reasonloom-eyebrow">Return to what matters</p>
+			<h1 className="reasonloom-title">Review</h1>
+			<p className="pb-6 font-prose text-base leading-relaxed text-muted-foreground">
 				Concepts come back for review on a simple schedule based on your practice attempts: 1, 3, 7, 14, 30, then 60 days. Solving without hints moves a concept to a longer interval; hints, giving up or moving on do not. This is a scheduling rule, not a measure of what you know.
 			</p>
 			{error && (
@@ -57,7 +67,7 @@ export function ReviewView() {
 
 			<h2 className="pb-2 font-ui text-sm">Due now{data ? ` (${data.due.length})` : ""}</h2>
 			{data && data.due.length === 0 && (
-				<p data-testid="review-empty" className="pb-4 font-ui text-xs text-muted-foreground">
+				<p data-testid="review-empty" className="pb-6 font-prose text-base leading-relaxed text-muted-foreground">
 					{data.attempts.length === 0 ? "Nothing to review yet. Finish a practice problem and it will appear here once it is due." : "Nothing is due. Upcoming reviews are listed below."}
 				</p>
 			)}

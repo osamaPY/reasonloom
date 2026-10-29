@@ -2,6 +2,8 @@
 
 ## Resume here
 
+**Latest session: Reasonloom rebrand reviewed, fixed and finished at the UI level.** See "Review of the previous session's work" in BUILD_DECISIONS.md. Gates after this session: typecheck, lint, production build, full test suite (see Checkpoint 2 below). Source-to-lesson integration remains the highest-value open gap; no live-model run has been done.
+
 Updated 2026-10-29 (second session). **P01 done (config level).** **P06 done: RELEASE-CANDIDATE CHECKPOINT reached (core path P00-P06).** Next: P07 (classroom/discovery) or, before expanding, a real-model practice session and an owner decision on the final name/publication (see Checkpoint below).
 
 User asked this chat to start the batches and continuously record progress for Claude takeover. No background continuation is promised. Read this file and `BUILD_DECISIONS.md`, then inspect Git status before resuming.
@@ -61,3 +63,11 @@ Caveats to resolve before publishing: rotate the API keys that were in the old l
 ## Resume here (for the next session)
 
 Read this file, BUILD_DECISIONS.md and `git status`. Next dependency-ready work: P07 (long-question layout, plan/source panels, search/bookmarks, graph filters) or P08 (richer sources) - but first consider the integration gap flagged in the README limits (lessons/practice do not use sources yet) which is the highest-value follow-up.
+
+## Checkpoint 2 (Reasonloom review + brand pass)
+
+Gates on the working tree: `npm run typecheck` clean; `npm run lint` clean; `npm run build` succeeds; full `npm test` = 3014 tests, 3008 pass, 0 fail, 6 skipped. Real Electron profile smoke passes (default and dev; profile path deliberately remains `LearnHarness Fork`). Browser check on the production build with the sample workspace: Subjects, Review, and home show the Reasonloom mark/wordmark, teal accent, and editorial headings; no duplicate wordmark.
+
+The rename initially broke 14 tests that hard-coded the old identity or mocked Electron `app` without `getPath`/`setPath`; fixed by deriving expectations from package metadata, adding the missing mocks, and updating the copy assertions (no assertion was loosened or skipped).
+
+Still not verified: live-model sessions; packaged installer/updater; macOS icon artwork (upstream art remains in `build/icon.icns`/`icon.icon`); accessibility audit beyond the keyboard-ring scoping; name/trademark clearance for "Reasonloom".

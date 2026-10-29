@@ -40,8 +40,17 @@ export function ingestSource(file: { name: string; bytes: number; text: string }
 			return { name, status: "added", id };
 		}
 		const id = decision.existingId;
+		const previousText = readSourceText(id);
 		writeSourceText(id, text);
-		writeSourceIndex(index.map((s) => (s.id === id ? { ...s, ...stats, name, revision: s.revision + 1, updatedAt: now } : s)));
+		try {
+			writeSourceIndex(index.map((s) => (s.id === id ? { ...s, ...stats, name, revision: s.revision + 1, updatedAt: now } : s)));
+		} catch (error) {
+			// An index failure must not leave its old hash/revision pointing at
+			// replacement text after the UI reports that the import failed.
+			if (previousText === null) deleteSourceText(id);
+			else writeSourceText(id, previousText);
+			throw error;
+		}
 		return { name, status: "updated", id };
 	} catch {
 		return { name, status: "rejected", reason: "write_failed" };

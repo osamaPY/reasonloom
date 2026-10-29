@@ -14,8 +14,8 @@ const ui = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 const prose = Source_Sans_3({ subsets: ["latin"], variable: "--font-sans3" });
 
 export const metadata: Metadata = {
-	title: "LearnHarness Fork",
-	description: "A teacher agent with a memory — sessions, quizzes, and a knowledge graph of what you know.",
+	title: "Reasonloom",
+	description: "Reasonloom: learn from your sources, practice your reasoning, and see your progress.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

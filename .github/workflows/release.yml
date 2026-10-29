@@ -175,17 +175,17 @@ jobs:
         run: |
           case "$RUNNER_OS" in
             macOS)
-              app="dist/mac-arm64/learnharness-fork.app/Contents"
+              app="dist/mac-arm64/reasonloom.app/Contents"
               payload="$app/Resources/server/standalone"
-              runtime="$app/MacOS/learnharness-fork"
+              runtime="$app/MacOS/reasonloom"
               ;;
             Windows)
               payload="dist/win-unpacked/resources/server/standalone"
-              runtime="dist/win-unpacked/learnharness-fork.exe"
+              runtime="dist/win-unpacked/reasonloom.exe"
               ;;
             Linux)
               payload="dist/linux-unpacked/resources/server/standalone"
-              runtime="dist/linux-unpacked/learnharness-fork"
+              runtime="dist/linux-unpacked/reasonloom"
               ;;
           esac
           node scripts/smoke-provider-runtime.mjs --standalone "$payload"
@@ -194,14 +194,14 @@ jobs:
         run: |
           case "$RUNNER_OS" in
             macOS)
-              app="dist/mac-arm64/learnharness-fork.app/Contents"
-              node scripts/smoke-demo-runtime.mjs --standalone "$app/Resources/server/standalone" --runtime "$app/MacOS/learnharness-fork" --browser
+              app="dist/mac-arm64/reasonloom.app/Contents"
+              node scripts/smoke-demo-runtime.mjs --standalone "$app/Resources/server/standalone" --runtime "$app/MacOS/reasonloom" --browser
               ;;
             Windows)
-              node scripts/smoke-demo-runtime.mjs --standalone dist/win-unpacked/resources/server/standalone --runtime dist/win-unpacked/learnharness-fork.exe --browser
+              node scripts/smoke-demo-runtime.mjs --standalone dist/win-unpacked/resources/server/standalone --runtime dist/win-unpacked/reasonloom.exe --browser
               ;;
             Linux)
-              xvfb-run -a node scripts/smoke-demo-runtime.mjs --standalone dist/linux-unpacked/resources/server/standalone --runtime dist/linux-unpacked/learnharness-fork --browser
+              xvfb-run -a node scripts/smoke-demo-runtime.mjs --standalone dist/linux-unpacked/resources/server/standalone --runtime dist/linux-unpacked/reasonloom --browser
               ;;
           esac
       - name: Save installers and update metadata

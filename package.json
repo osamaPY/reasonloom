@@ -1,6 +1,6 @@
 {
-	"name": "learnharness-fork",
-	"productName": "LearnHarness Fork",
+	"name": "reasonloom",
+	"productName": "Reasonloom",
 	"version": "0.4.0",
 	"license": "AGPL-3.0-only",
 	"author": {
@@ -8,7 +8,7 @@
 		"email": "255718537+amosblomqvist@users.noreply.github.com"
 	},
 	"homepage": "https://github.com/osamaPY/learnharness-fork",
-	"desktopName": "learnharness-fork.desktop",
+	"desktopName": "reasonloom.desktop",
 	"description": "An agent harness for learning: adaptive teaching, practice, and a persistent knowledge graph.",
 	"type": "module",
 	"private": true,

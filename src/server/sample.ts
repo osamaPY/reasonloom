@@ -10,10 +10,12 @@
  * session in the sidebar. Nothing is hidden or auto-deleted.
  */
 import { DAY_MS } from "../core/reviews.ts";
+import { createHash, randomUUID } from "node:crypto";
+import { normalizeText, splitPassages } from "../core/sources.ts";
+import { readSourceIndex, writeSourceIndex, writeSourceText } from "../store/sources.ts";
 import type { LhMessage } from "../core/native-messages.ts";
 import { createChat } from "./chats.ts";
 import { stores } from "./stores.ts";
-import { ingestSource, assignSourceToSubject } from "./sources.ts";
 import { assignSessionToSubject, createSubjectRecord, readSubjects } from "./subjects.ts";
 
 export const SAMPLE_SUBJECT = "Sample: Eigenvalues";
@@ -108,8 +110,22 @@ export function createSampleWorkspace(now: number = Date.now()): SampleResult {
 	if (!made.ok) throw new Error(`sample subject: ${made.error}`);
 	const subject = made.value.subjects[made.value.subjects.length - 1]!;
 
-	const source = ingestSource({ name: SAMPLE_SOURCE_NAME, bytes: Buffer.byteLength(SAMPLE_SOURCE_TEXT), text: SAMPLE_SOURCE_TEXT });
-	if (source.status === "added" || source.status === "updated" || source.status === "duplicate") assignSourceToSubject(source.id, subject.id);
+	// Demo data owns a separate copy: normal ingestion updates matching names
+	// and deduplicates content, either of which can mutate a learner's source.
+	const index = readSourceIndex();
+	let name = SAMPLE_SOURCE_NAME;
+	for (let n = 2; index.some((s) => s.name.toLowerCase() === name.toLowerCase()); n++) {
+		name = `sample-eigenvalues-${n}.md`;
+	}
+	const id = randomUUID();
+	const text = normalizeText(SAMPLE_SOURCE_TEXT);
+	const at = new Date(now).toISOString();
+	writeSourceText(id, text);
+	writeSourceIndex([...index, {
+		id, name, sha256: createHash("sha256").update(text).digest("hex"),
+		bytes: Buffer.byteLength(text), chars: text.length, passages: splitPassages(text).length,
+		revision: 1, subjectId: subject.id, addedAt: at, updatedAt: at,
+	}]);
 
 	const chat = createChat(SAMPLE_CHAT_TITLE, "practice");
 	stores.chatStore.saveMessages(chat.id, sampleMessages(now));

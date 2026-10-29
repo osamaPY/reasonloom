@@ -59,7 +59,7 @@ describe("desktop window chrome", () => {
 			};
 			runInNewContext(mainSource, context, { filename: mainFile });
 			const expected = join("/fixture/app-data", `LearnHarness Fork${dev ? "-dev" : ""}`);
-			assert.equal(name, "LearnHarness Fork");
+			assert.equal(name, "Reasonloom");
 			assert.equal(lockedProfile, expected);
 			assert.equal(runInNewContext("DATA_DIR()", context), join(expected, "data"));
 			assert.equal(runInNewContext("AUTH_FILE()", context), join(expected, "auth.json"));
@@ -174,9 +174,9 @@ describe("desktop packaging policy", () => {
 		const { AppInfo } = require("app-builder-lib/out/appInfo.js");
 		const metadata = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 		const info = new AppInfo({ config, metadata });
-		assert.equal(info.productFilename, "learnharness-fork");
-		assert.equal(info.productName, "LearnHarness Fork");
-		assert.equal(info.id, "io.github.osamapy.learnharnessfork");
+		assert.equal(info.productFilename, "reasonloom");
+		assert.equal(info.productName, "Reasonloom");
+		assert.equal(info.id, "io.github.osamapy.reasonloom");
 	});
 
 	it("ships Mac arm64, Windows NSIS x64, and both Linux x64 channels", () => {
@@ -198,7 +198,7 @@ describe("desktop packaging policy", () => {
 		assert.equal(pkg.author.name, "Amos Blomqvist");
 		assert.equal(pkg.author.email, "255718537+amosblomqvist@users.noreply.github.com");
 		assert.equal(pkg.homepage, "https://github.com/osamaPY/learnharness-fork");
-		assert.equal(pkg.desktopName, "learnharness-fork.desktop");
+		assert.equal(pkg.desktopName, "reasonloom.desktop");
 	});
 });
 

@@ -48,7 +48,11 @@ const PRODUCT_NAME = require("../package.json").productName;
 // follows this fork's productName, never the original LearnHarness profile.
 // productName metadata alone does not reach app.name. Set it before the
 // LH_DEV_URL suffix and single-instance lock; dev uses its own -dev profile.
+// Preserve the existing fork profile across the Reasonloom rebrand.
+app.setName("LearnHarness Fork");
+const forkProfile = app.getPath("userData");
 app.setName(PRODUCT_NAME);
+app.setPath("userData", forkProfile);
 const AUTH_FILE = () => path.join(app.getPath("userData"), "auth.json");
 const DATA_DIR = () => path.join(app.getPath("userData"), "data");
 

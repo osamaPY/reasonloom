@@ -1,28 +1,20 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lh_banner_dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/lh_banner_light.png">
-    <img src="docs/assets/lh_banner_light.png" alt="LearnHarness" width="640">
-  </picture>
-</p>
+# Reasonloom
 
-<p align="center"><strong>An agent harness for learning.</strong></p>
+**Weave ideas into understanding.**
 
-<p align="center">
-  <a href="https://learnharness.ai">Upstream downloads</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="docs/development.md">Documentation</a> ·
-  <a href="https://github.com/osamaPY/learnharness-fork/issues">Fork issues</a> ·
-  <a href="https://discord.gg/5tCHHQEB2e">Discord</a>
-</p>
+An AI learning workspace for teaching, practice, and the connections between ideas. Organize sessions into subjects, keep a local source library, and revisit concepts through review.
 
-This project is a fork of [LearnHarness](https://github.com/amosblomqvist/learnharness), originally created by Amos Blomqvist. I liked its approach to adaptive AI-assisted learning and wanted to build on that foundation with my own improvements. Full credit to Amos Blomqvist and the original contributors for the foundation. The teaching engine, knowledge graph, practice, dictation, provider support, and desktop shell below come from upstream, not this fork. Download, issue, and community links on this page currently point to the **original project**; this fork has no independent release yet.
+[How it works](#how-it-works) · [Documentation](docs/development.md) · [Issues](https://github.com/osamaPY/learnharness-fork/issues) · [Build progress](docs/BUILD_PROGRESS.md)
+
+Reasonloom is an independent fork of [LearnHarness](https://github.com/amosblomqvist/learnharness), created by **Amos Blomqvist**. We liked its approach to adaptive AI-assisted learning and are building on that foundation. The teaching engine, knowledge graph, practice, dictation, provider support, and desktop shell are inherited from upstream. Original authorship and the AGPL-3.0 license are preserved; Reasonloom is not an official upstream release. The changes below distinguish our work from that foundation.
+
+There is no published Reasonloom release yet. Upstream downloads and screenshots below describe the original application.
 
 ## What this fork changes (working)
 
 - Updated the local development baseline from upstream 0.3.9 to its 0.4.0-preparation revision while retaining existing local edits. Upstream's new provider, Claude Code, file-path, and image capabilities are **inherited**, not fork-authored features.
 - Made existing automated tests run on Windows by using native paths and file URLs, adapting test fixtures to retained local changes, and excluding POSIX-only file-mode and signal assertions on Windows. The 0.4.0-preparation suite, typecheck, lint, and production build pass under the conditions recorded in the [fork roadmap](docs/FORK_ROADMAP.md). These are development and verification changes, not new learner-facing features.
-- Set the browser and desktop display name to **LearnHarness Fork**, with an independent application ID, executable, and desktop data directory. The original application's data is not migrated or modified. Development-shell data uses a separate `LearnHarness Fork-dev` profile; ordinary web development retains its configured data directory.
+- Named the browser and desktop application **Reasonloom**, with an independent application ID and executable. Desktop profiles intentionally retain `LearnHarness Fork` / `LearnHarness Fork-dev` to preserve existing fork data. The original application's data is not migrated or modified; ordinary web development retains its configured data directory.
 - Directed installer publishing and packaged update checks to `osamaPY/learnharness-fork`, with distinct installer names and release-validation checks. No fork installer or update has been published or tested on a real installed copy yet.
 - Removed hardcoded credential assignments from the local Windows launch helpers. Configure providers in Settings or through your own environment; do not add credentials to these scripts.
 - Retained earlier local Deepgram and Electron edits and Windows launch helpers for further review; their behavior has not been approved or verified as a fork release feature.
@@ -47,7 +39,7 @@ LearnHarness uses AI agents to plan and teach lessons from your current understa
 
 Instead of just giving you an explanation, it uses your answers and thinking to decide what you need next. Teaching builds understanding one reasoning step at a time. Practice makes it usable. A persistent knowledge graph carries it across sessions.
 
-![LearnHarness teaching session](docs/assets/teaching-session.png)
+![Upstream LearnHarness teaching session](docs/assets/teaching-session.png)
 
 ## How it works
 
@@ -66,9 +58,9 @@ What you are taught accumulates as propositions and reasoning chains: individual
 
 Future teaching sessions can read the graph instead of starting from scratch. Practice sessions can draw their material from it. It stores the ideas and their connections, not ratings of your ability.
 
-![LearnHarness knowledge graph](docs/assets/knowledge-graph.png)
+![Upstream LearnHarness knowledge graph](docs/assets/knowledge-graph.png)
 
-## Download and get started
+## Upstream downloads (not Reasonloom)
 
 **[Download from learnharness.ai](https://learnharness.ai)** · [GitHub Releases](https://github.com/amosblomqvist/learnharness/releases)
 

@@ -106,6 +106,7 @@ export function SubjectsView() {
 						defaultValue={s.goal}
 						placeholder="Goal: what do you want to be able to do?"
 						rows={2}
+						style={{ fieldSizing: "content" } as React.CSSProperties}
 						onBlur={(e) => {
 							if (e.target.value !== s.goal) void send(`/api/subjects/${s.id}`, "PUT", { goal: e.target.value });
 						}}
@@ -142,9 +143,10 @@ export function SubjectsView() {
 	);
 
 	return (
-		<div className="mx-auto h-full w-full max-w-2xl overflow-y-auto px-4 pb-16 pt-16">
-			<h1 className="pb-1 font-ui text-lg">Subjects</h1>
-			<p className="pb-4 font-ui text-xs text-muted-foreground">Group sessions by what you are learning. Archiving a subject keeps its sessions.</p>
+		<div className="reasonloom-workspace mx-auto h-full w-full max-w-2xl overflow-y-auto px-4 pb-16 pt-16">
+			<p className="reasonloom-eyebrow">Your learning, connected</p>
+			<h1 className="reasonloom-title">Subjects</h1>
+			<p className="pb-6 font-prose text-base leading-relaxed text-muted-foreground">Group sessions by what you are learning. Archiving a subject keeps its sessions.</p>
 
 			<form
 				className="mb-6 flex flex-col gap-2 rounded-xl border bg-card/85 p-4"

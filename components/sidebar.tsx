@@ -674,9 +674,9 @@ function SessionsSidebar() {
 						<Link
 							href="/"
 							aria-label="Home"
-							className="lh-no-drag flex size-9 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+							className="lh-no-drag flex min-h-9 min-w-0 items-center gap-2 rounded-md px-1 transition-colors hover:bg-accent"
 						>
-							<LhMark className="size-6" />
+							<LhMark className="size-7 shrink-0 text-[var(--brand-accent)]" /><span className="reasonloom-wordmark text-xl">Reasonloom</span>
 						</Link>
 					</Hint>
 					<Hint label="Close sidebar" action="toggle-sidebar">

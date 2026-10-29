@@ -25,6 +25,24 @@ function run<T>(dir: string, body: string): T {
 }
 
 describe("end-to-end journey (server layer)", () => {
+	it("sample creation preserves a learner's same-named source and duplicate content assignment", () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lh-e2e-"));
+		try {
+			const out = run<{ before: unknown; after: unknown; text: string }>(dir, `
+				const sample = await import(${JSON.stringify(pathToFileURL(path.join(REPO_ROOT, "src/server/sample.ts")).href)});
+				const mine = m.createSubjectRecord({ name: "My subject" }).value.subjects[0];
+				const a = m.ingestSource({ name: "sample-eigenvalues.md", bytes: 8, text: "My notes" });
+				const b = m.ingestSource({ name: "my-copy.md", bytes: Buffer.byteLength(sample.SAMPLE_SOURCE_TEXT), text: sample.SAMPLE_SOURCE_TEXT });
+				m.assignSourceToSubject(a.id, mine.id); m.assignSourceToSubject(b.id, mine.id);
+				const before = m.readSourceIndex();
+				m.createSampleWorkspace();
+				console.log(JSON.stringify({ before, after: m.readSourceIndex().filter(s => s.id === a.id || s.id === b.id), text: m.readSourceText(a.id) }));`);
+			assert.deepEqual(out.after, out.before);
+			assert.equal(out.text, "My notes");
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
 	it("sample workspace links subject, source, session and a due review; survives restarts; is idempotent", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lh-e2e-"));
 		try {
