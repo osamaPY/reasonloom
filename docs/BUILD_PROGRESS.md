@@ -105,3 +105,22 @@ Request: any formula must be typeset as LaTeX and easy on the eye. The inherited
 Tests: `math-text.test.ts` (12), `render-math-text.test.tsx` (5), `currency-vs-math.test.ts` (3). Full suite 3055 tests, 3049 pass, 0 fail, 6 skipped. Typecheck, lint, production build clean. Browser (production build): inline, display, matrix, aligned, legacy `\(..\)`/`\[..\]`, literal `\$`, long equation, LaTeX in sidebar and header titles, Sources passages, Review and the Sources card; no raw `$` left in those surfaces and no `.katex-error`.
 
 Not verified: other inherited surfaces (graph node labels, quiz dock options) beyond what upstream already rendered; very long single-line display equations in narrow windows; copy-as-LaTeX.
+
+## Checkpoint 6 (live end-to-end with a real model)
+
+Run: production build against an isolated data dir (real `data/` untouched), DeepSeek key supplied only through the `DEEPSEEK_API_KEY` environment variable of the test server (never written to a file, the repo or this log; the temp dir was deleted afterwards), all three slots = `deepseek-flash`, thinking low. Total spend about two cents across ~8 model turns.
+
+What ran for real, through the UI: sample workspace -> Subjects -> "Start a lesson" and "Start practice" from the card -> home composer with the subject picker -> real replies. Verified from the stored records and the UI:
+- Marker: message 0 of each session is the `source-context` marker; the session is assigned to the subject (also from the home composer, which was the last unverified path).
+- Practice: the model posed a problem built from the notes (characteristic equation, nonzero eigenvectors), its hidden worked solution cited `[S1.P4]` and `[S1.P6]` (valid labels, relevant passages), I answered, it concluded `solved` with a verdict, the attempt was derived from that real record and Review scheduled it (box 1, due in 3 days). So the review derivation works on real `problem`/`conclude` output, not just scripted records.
+- Teaching: the first lesson turn ignored the notes (a probe about the Jordan form, no citation). Fix: the marker now tells the model to build questions/quizzes/problems from the passages and to cite labels in every explanation or reveal. Re-run: the probe quoted the notes and cited `[S1.P3]`; a later run in a new session did not cite at all, so grounding in lessons is improved, not guaranteed.
+- Math: matrices, display equations and aligned derivations from the real model rendered correctly in replies, the quiz dock and practice cards (no `.katex-error`).
+
+Bugs found and fixed:
+1. Cited labels were only linked in normal reply text; in practice reveals and quiz explanations (where the model actually cites) they stayed plain. A `CitationsProvider` + `CitationBoundary` now links them in every `ToolContentResponse` (3 new tests).
+2. Review showed a long multi-part problem in full, pushing the list off screen; statements are now clamped with Show more / Show less.
+3. Lesson grounding wording (above).
+
+Not an upstream bug: the "Why" button under "YOUR THINKING" is the collapsed explanation toggle.
+
+Still open / not verified: citation fidelity beyond a handful of runs (this is not an evaluation); the other providers; the desktop installer/updater; macOS icon art; name clearance. The key was pasted in chat, so it should be rotated.

@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 
 import { createContext, Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useChatSession } from "@/components/session";
@@ -62,6 +61,7 @@ import { ThinkingCard, type PracticeThinkingData } from "@/components/practice-c
 import { GraphContextCard, type GraphContextData } from "@/components/graph-context-card";
 import { SourceContextCard } from "@/components/source-context-card";
 import { MathText } from "@/components/math-text";
+import { CitationBoundary, CitationsProvider } from "@/components/citations-context";
 import { TopBar } from "@/components/top-bar";
 import type { ArtifactPartProps, JobRecord, Phase3, QuestionAnswerData, QuestionFormDraft, TurnUsage, SessionPricing } from "@/src/core";
 import type { LhViewMessage } from "@/src/core";
@@ -275,21 +275,6 @@ export function Chat({
 		}
 		return out;
 	}, [messages]);
-	// Streamdown renders a link as a safety-gated button (it would open a
-	// confirm modal / new tab). A cited label is internal, so a capture-phase
-	// click handler on the text wrapper routes it to the Sources page instead.
-	const citationRouter = useRouter();
-	const onCitationClick = useCallback(
-		(e: React.MouseEvent) => {
-			const link = (e.target as HTMLElement).closest('[data-streamdown="link"]');
-			const target = link ? citations[link.textContent?.trim() ?? ""] : undefined;
-			if (!target) return;
-			e.preventDefault();
-			e.stopPropagation();
-			citationRouter.push(`/sources?source=${encodeURIComponent(target.sourceId)}&ref=${encodeURIComponent(target.ref)}`);
-		},
-		[citations, citationRouter],
-	);
 
 	// The reattach settled terminal → the sync-and-continue seam (below).
 	setReattachSettled(() => reattachSettledRef.current());
@@ -1276,6 +1261,7 @@ export function Chat({
 	};
 
 	return (
+		<CitationsProvider value={citations}>
 		<ChatActionsContext.Provider
 			value={{
 				chatId,
@@ -1582,8 +1568,8 @@ export function Chat({
 														const sourceId = textPartMessageId(part.id);
 														const anchor = sourceId && sourceTextParts.get(sourceId) === part.id ? messageAnchorId(sourceId) : undefined;
 														return (
-															<div key={part.id || pi} id={anchor} data-source-message-id={sourceId ?? undefined} className="lh-source-passage" onClickCapture={onCitationClick}>
-																<MessageResponse>{linkCitations(part.text ?? "", citations)}</MessageResponse>
+															<div key={part.id || pi} id={anchor} data-source-message-id={sourceId ?? undefined} className="lh-source-passage">
+																<CitationBoundary><MessageResponse>{linkCitations(part.text ?? "", citations)}</MessageResponse></CitationBoundary>
 															</div>
 														);
 													}
@@ -1827,6 +1813,7 @@ export function Chat({
 			}}
 		/>
 		</ChatActionsContext.Provider>
+		</CitationsProvider>
 	);
 }
 

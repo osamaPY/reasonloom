@@ -26,7 +26,7 @@ Before and after:
 | :---: | :---: |
 | ![Before: upstream teaching session](docs/assets/teaching-session.png) | ![After: source-grounded session with citations](docs/assets/reasonloom/grounded-session.png) |
 
-*The reply in the "after" screenshot is a scripted example I used for the picture, not live model output.*
+*The "after" screenshot is a real run (DeepSeek V4.1 Flash on the sample notes): the question quotes my notes and links to the passage it used.*
 
 ## Get it running
 
@@ -82,7 +82,9 @@ The model is handed that subject's passages, told to prefer them, to say so when
 ### Math looks like math
 Anywhere a formula shows up, it's typeset with LaTeX (KaTeX): in the model's replies, session titles in the sidebar, your source passages, the "Sources" card, and Review. Write `$x^2$` for inline and `$$...$$` on its own line for a displayed equation (`\(...\)` and `\[...\]` work too). Prices like "$5 and $6" are left as text, and a bad formula shows its source instead of breaking the page.
 
-![Inline math, matrices, aligned equations and display math](docs/assets/reasonloom/latex.png)
+A real practice session on the sample notes: the problem, my answer, the verdict, and the model's worked solution with matrices and equations, citing `S1.P4` and `S1.P6` (both are links to my notes).
+
+![A live practice session: problem, answer, verdict and a cited, typeset solution](docs/assets/reasonloom/practice-session.png)
 
 ### 5. Come back for review
 Finished practice problems show up on **Review**. Each concept returns after 1, 3, 7, 14, 30, then 60 days, and the page tells you why it's due ("last attempt solved with hints, 5 days overdue"). Use **Postpone** for 1, 3 or 7 days, or **Grading is wrong** if the model marked you incorrectly (that attempt then stops counting).
@@ -94,7 +96,7 @@ Finished practice problems show up on **Review**. Each concept returns after 1, 
 I'd rather you know than be surprised:
 
 - No installer or release yet. Run it from source.
-- Source grounding is an instruction to the model, not a fence. A citation shows the passage exists, not that it supports the claim. I haven't tested it with a live model yet.
+- Source grounding is an instruction to the model, not a fence. A citation shows the passage exists, not that it supports the claim. I've run lessons, practice and review end to end with DeepSeek V4.1 Flash on the sample notes and the citations pointed at real, relevant passages, but that's a handful of runs, not an evaluation. In lessons the model sometimes asks a question without citing anything.
 - The review schedule is a simple fixed rule, not proof it helps you remember. Days are UTC.
 - Sources are text and Markdown only for now: no PDF, web pages or OCR. The model only gets about 24k characters from up to 10 sources, and the Sources card tells you what was left out.
 - Only sessions started with a subject chosen are grounded; existing sessions aren't.

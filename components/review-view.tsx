@@ -9,6 +9,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { MessageResponse } from "@/components/ai-elements/message";
+import { ClampedMarkdown } from "@/components/clamped-markdown";
 import { MathText } from "@/components/math-text";
 import type { ReviewOverview } from "@/src/core";
 
@@ -124,7 +125,7 @@ export function ReviewView() {
 									{a.disputed && <span className="text-destructive"> · grading disputed, not counted</span>}
 									{a.outcome === "dismissed" && <span className="text-muted-foreground"> · not counted</span>}
 								</p>
-								{a.statement && <MessageResponse className="text-sm">{a.statement}</MessageResponse>}
+								{a.statement && <ClampedMarkdown className="text-sm">{a.statement}</ClampedMarkdown>}
 								{a.verdict && <MessageResponse className="text-xs text-muted-foreground">{a.verdict}</MessageResponse>}
 								<p className="font-ui text-xs text-muted-foreground">
 									<Link href={`/chat/${a.chatId}`} className="hover:underline">

@@ -34,7 +34,8 @@ import {
   type PluginConfig,
 } from "streamdown";
 import { mdComponents } from "@/components/md-blocks";
-import { repairMathForDisplay, transformMathDelimiters } from "@/src/core";
+import { linkCitations, repairMathForDisplay, transformMathDelimiters } from "@/src/core";
+import { CitationBoundary, useCitations } from "@/components/citations-context";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: LhViewMessage["role"];
@@ -398,10 +399,16 @@ MessageResponse.displayName = "MessageResponse";
 /** Recovery is a tool-text presentation concern, not a shape/answer-data
  * transform. Ordinary assistant/user prose keeps MessageResponse unchanged. */
 export function ToolContentResponse({ children, ...props }: MessageResponseProps) {
+  // Fork: cited source labels ([S1.P2]) in a session grounded in a subject's
+  // sources become links; a no-op outside such a session.
+  const citations = useCitations();
+  const repaired = typeof children === "string" ? repairMathForDisplay(children) : children;
   return (
-    <MessageResponse {...props}>
-      {typeof children === "string" ? repairMathForDisplay(children) : children}
-    </MessageResponse>
+    <CitationBoundary>
+      <MessageResponse {...props}>
+        {typeof repaired === "string" ? linkCitations(repaired, citations) : repaired}
+      </MessageResponse>
+    </CitationBoundary>
   );
 }
 
